@@ -290,6 +290,103 @@
 </section>
 
 <!-- ============================================= -->
+<!-- ISSUE SUMMARY TABLE                            -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Issue Summary</h2>
+  <p>ภาพรวมของปัญหาทั้งหมดที่พบในโปรเจกต์นี้ — เรียงตามความรุนแรง</p>
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:15px;">
+      <thead>
+        <tr style="background:var(--blue-deep);color:var(--white);">
+          <th style="padding:12px 14px;text-align:center;white-space:nowrap;">#</th>
+          <th style="padding:12px 14px;text-align:left;">Issue</th>
+          <th style="padding:12px 14px;text-align:center;">Severity</th>
+          <th style="padding:12px 14px;text-align:left;">File</th>
+          <th style="padding:12px 14px;text-align:left;">Quick Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#FFF5F5;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">1</td>
+          <td style="padding:11px 14px;">10 copies of the same function (<code>main_game1</code>…<code>main_game10</code>)</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge critical">Critical</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>project.py</code></td>
+          <td style="padding:11px 14px;">Merge into one <code>play_round(round_num, ...)</code> function</td>
+        </tr>
+        <tr style="background:#FFF5F5;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">2</td>
+          <td style="padding:11px 14px;">6 separate functions to read one CSV (<code>get_question</code>, <code>get_a</code>…)</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge critical">Critical</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>project.py</code></td>
+          <td style="padding:11px 14px;">Replace with one <code>load_questions(path)</code> that reads once</td>
+        </tr>
+        <tr style="background:#FFF5F5;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">7</td>
+          <td style="padding:11px 14px;"><code>reset()</code> silently deletes the last leaderboard entry on every restart</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge critical">Critical</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>project.py</code></td>
+          <td style="padding:11px 14px;">Don't rewrite leaderboard on reset — just reset <code>point</code> &amp; <code>counts</code></td>
+        </tr>
+        <tr style="background:#FFFBEB;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">3</td>
+          <td style="padding:11px 14px;">Global variables (<code>name</code>, <code>point</code>, <code>counts</code>, <code>point2</code>) mutated everywhere</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge warning">Warning</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>project.py</code></td>
+          <td style="padding:11px 14px;">Move state into a <code>GameState</code> class; pass it as a parameter</td>
+        </tr>
+        <tr style="background:#FFFBEB;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">4</td>
+          <td style="padding:11px 14px;"><code>raise TypeError</code> used for "not enough questions" (wrong exception type)</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge warning">Warning</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>project.py</code></td>
+          <td style="padding:11px 14px;">Change to <code>raise ValueError("...")</code> with a descriptive message</td>
+        </tr>
+        <tr style="background:#FFFBEB;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">5</td>
+          <td style="padding:11px 14px;">Duplicate test name <code>test_get_point1</code> — only the second one runs</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge warning">Warning</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>test_project.py</code></td>
+          <td style="padding:11px 14px;">Rename to <code>test_get_point_wrong_answer</code> / <code>test_get_point_correct_answer</code></td>
+        </tr>
+        <tr style="background:#FFFBEB;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">9</td>
+          <td style="padding:11px 14px;">Scary comment <code>#does not work on this file</code> at top of file</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge warning">Warning</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>project.py</code></td>
+          <td style="padding:11px 14px;">Delete it or replace with a clear docstring explaining how to run</td>
+        </tr>
+        <tr style="background:#F0F9FF;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">6</td>
+          <td style="padding:11px 14px;">Tests depend on real CSV files existing on disk</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge info">Info</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>test_project.py</code></td>
+          <td style="padding:11px 14px;">Use pytest's <code>tmp_path</code> fixture to create files in each test</td>
+        </tr>
+        <tr style="background:#F0F9FF;">
+          <td style="padding:11px 14px;text-align:center;font-weight:700;">8</td>
+          <td style="padding:11px 14px;">Star import (<code>from tkinter import *</code>) and inconsistent variable naming</td>
+          <td style="padding:11px 14px;text-align:center;"><span class="badge info">Info</span></td>
+          <td style="padding:11px 14px;white-space:nowrap;"><code>project.py</code></td>
+          <td style="padding:11px 14px;">Use <code>import tkinter as tk</code>; fix <code>bottons</code> → <code>buttons</code>, rename <code>point2</code></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--blue-soft);font-weight:700;">
+          <td colspan="2" style="padding:12px 14px;">Total: 9 issues</td>
+          <td style="padding:12px 14px;text-align:center;">
+            <span class="badge critical">3 Critical</span>
+            <span class="badge warning" style="margin-left:4px;">4 Warning</span>
+            <span class="badge info" style="margin-left:4px;">2 Info</span>
+          </td>
+          <td colspan="2" style="padding:12px 14px;color:var(--blue-deep);">Fix Critical issues first — biggest impact on code quality</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================= -->
 <!-- CODE ISSUES                                    -->
 <!-- ============================================= -->
 <section class="card">
