@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CS50P Project Portal — da Guess'in Game</title>
+<style>
+  :root {
+    --blue-deep: #1E3A8A;
+    --blue-mid:  #3B82F6;
+    --blue-soft: #DBEAFE;
+    --white:     #FFFFFF;
+    --ink:       #0F172A;
+    --code-bg:   #1E293B;
+    --code-fg:   #E2E8F0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(160deg, #EFF6FF 0%, #DBEAFE 100%);
+    min-height: 100vh;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+    max-width: 720px;
+  }
+  .hero .badge-top {
+    display: inline-block;
+    background: var(--blue-deep);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    color: var(--blue-deep);
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  .hero h1 span { color: var(--blue-mid); }
+  .hero p {
+    font-size: 17px;
+    color: #475569;
+    line-height: 1.65;
+    max-width: 560px;
+    margin: 0 auto 24px;
+  }
+  .hero .meta-pills {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+  }
+  .hero .pill {
+    background: var(--white);
+    border: 1px solid #CBD5E1;
+    color: #475569;
+    font-size: 13px;
+    padding: 5px 14px;
+    border-radius: 999px;
+  }
+
+  /* ── Card grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 960px;
+  }
+
+  /* ── Portal card ── */
+  .card {
+    background: var(--white);
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 28px 26px;
+    box-shadow: 0 4px 20px rgba(30, 58, 138, 0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(30, 58, 138, 0.13);
+  }
+  .card .icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .card .icon.blue  { background: var(--blue-soft); }
+  .card .icon.green { background: #DCFCE7; }
+  .card .icon.amber { background: #FEF3C7; }
+  .card .icon.slate { background: #F1F5F9; }
+  .card h2 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--blue-deep);
+  }
+  .card p {
+    font-size: 14.5px;
+    color: #64748B;
+    line-height: 1.6;
+    flex: 1;
+  }
+  .card a.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: var(--white);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: opacity 0.15s ease;
+    align-self: flex-start;
+  }
+  .card a.btn:hover { opacity: 0.88; }
+  .card a.btn.ghost {
+    background: none;
+    color: var(--blue-deep);
+    border: 2px solid var(--blue-soft);
+  }
+  .card a.btn.ghost:hover { background: var(--blue-soft); }
+
+  /* score badge inside card */
+  .score-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    align-self: flex-start;
+  }
+
+  /* ── Info row ── */
+  .info-row {
+    max-width: 960px;
+    width: 100%;
+    margin-top: 32px;
+    background: var(--white);
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 22px 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+    box-shadow: 0 2px 10px rgba(30,58,138,0.05);
+  }
+  .info-row h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue-deep);
+    margin-bottom: 8px;
+  }
+  .info-row .col { flex: 1; min-width: 200px; }
+  .info-row code {
+    background: var(--blue-soft);
+    color: var(--blue-deep);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+  }
+  .info-row ul { list-style: none; padding: 0; }
+  .info-row ul li {
+    font-size: 14px;
+    color: #475569;
+    padding: 3px 0;
+  }
+  .info-row ul li::before { content: "→ "; color: var(--blue-mid); font-weight: 700; }
+
+  footer {
+    margin-top: 48px;
+    font-size: 13px;
+    color: #94A3B8;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="badge-top">CS50P Final Project</div>
+  <h1>da <span>Guess'in</span> Game<br>Project Portal</h1>
+  <p>
+    A fullscreen multiple-choice trivia game built with Python &amp; tkinter,
+    complete with a CSV question loader, real-time scoring, and a persistent leaderboard.
+  </p>
+  <div class="meta-pills">
+    <span class="pill">Python 3</span>
+    <span class="pill">tkinter GUI</span>
+    <span class="pill">CSV I/O</span>
+    <span class="pill">pytest</span>
+    <span class="pill">OOP + @property</span>
+  </div>
+</div>
+
+<!-- ── Card grid ── -->
+<div class="grid">
+
+  <!-- Tony Review -->
+  <div class="card">
+    <div class="icon blue">🧑‍🏫</div>
+    <div class="score-inline">7.2 / 10</div>
+    <h2>Tony's Code Review</h2>
+    <p>
+      A detailed, mentor-style HTML report covering what was done great,
+      9 specific issues to improve (with before/after code), and encouragement
+      for the CS50P submission.
+    </p>
+    <a class="btn" href="tony_review.html">Open Report →</a>
+  </div>
+
+  <!-- Source: project.py -->
+  <div class="card">
+    <div class="icon green">🐍</div>
+    <h2>Main Program</h2>
+    <p>
+      <code>project.py</code> — Entry point. Handles CSV loading,
+      tkinter GUI flow (main menu → name entry → 10 questions → end screen),
+      leaderboard read/write, and input validation.
+    </p>
+    <a class="btn ghost" href="project.py">View Source</a>
+  </div>
+
+  <!-- Source: GuessingBoard -->
+  <div class="card">
+    <div class="icon amber">🎯</div>
+    <h2>Game Logic Class</h2>
+    <p>
+      <code>GuessingBoard/Guessing_Board.py</code> — <code>GuessingBoardOperator</code>
+      class with scoring logic, <code>@property</code> / setter, and
+      a custom <code>__int__</code> dunder method.
+    </p>
+    <a class="btn ghost" href="GuessingBoard/Guessing_Board.py">View Source</a>
+  </div>
+
+  <!-- Tests -->
+  <div class="card">
+    <div class="icon slate">🧪</div>
+    <h2>Test Suite</h2>
+    <p>
+      <code>test_project.py</code> — pytest tests covering CSV parsing
+      (<code>get_question</code>, <code>get_ans</code>) and game scoring
+      logic with <code>pytest.raises</code> for error paths.
+    </p>
+    <a class="btn ghost" href="test_project.py">View Tests</a>
+  </div>
+
+</div>
+
+<!-- ── Info row ── -->
+<div class="info-row">
+  <div class="col">
+    <h3>How to Run</h3>
+    <ul>
+      <li>Open in PyCharm or VS Code</li>
+      <li>Run <code>python project.py</code></li>
+      <li>Enter path: <code>question.csv</code></li>
+      <li>Press <code>Escape</code> to exit fullscreen</li>
+    </ul>
+  </div>
+  <div class="col">
+    <h3>How to Test</h3>
+    <ul>
+      <li>Run <code>pytest test_project.py</code></li>
+      <li>Single test: <code>pytest test_project.py::test_get_question</code></li>
+      <li>Requires <code>question.csv</code> in project root</li>
+    </ul>
+  </div>
+  <div class="col">
+    <h3>CSV Format</h3>
+    <ul>
+      <li>Columns: <code>question, choice_a … choice_d, ans</code></li>
+      <li>Minimum <strong>10</strong> question rows</li>
+      <li>Question max <strong>45</strong> characters</li>
+      <li>Answer must be <code>A</code> / <code>B</code> / <code>C</code> / <code>D</code></li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  CS50P Final Project &nbsp;·&nbsp; Reviewed by Tony Python Mentor &nbsp;·&nbsp; 2026-May-24
+</footer>
+
+</body>
+</html>

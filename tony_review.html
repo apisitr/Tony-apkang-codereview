@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tony's Code Review — CS50P Guessing Game</title>
+<style>
+  :root {
+    --blue-deep: #1E3A8A;
+    --blue-mid:  #3B82F6;
+    --blue-soft: #DBEAFE;
+    --white:     #FFFFFF;
+    --ink:       #0F172A;
+    --code-bg:   #1E293B;
+    --code-fg:   #E2E8F0;
+    --good:      #16A34A;
+    --warn:      #D97706;
+    --bad:       #DC2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* Header */
+  header.hero {
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: var(--white);
+    padding: 40px 32px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(30, 58, 138, 0.15);
+    margin-bottom: 32px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: -0.5px; }
+  header.hero .sub { opacity: 0.95; font-size: 16px; }
+  header.hero .meta {
+    margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px;
+    font-size: 14px;
+  }
+  header.hero .pill {
+    background: rgba(255,255,255,0.15);
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+
+  /* Section card */
+  section.card {
+    background: var(--white);
+    border: 1px solid var(--blue-soft);
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.06);
+  }
+  section.card h2 {
+    margin: 0 0 16px;
+    color: var(--blue-deep);
+    font-size: 24px;
+    border-bottom: 3px solid var(--blue-soft);
+    padding-bottom: 10px;
+  }
+  section.card h3 {
+    color: var(--blue-deep);
+    margin-top: 22px;
+    margin-bottom: 8px;
+    font-size: 18px;
+  }
+  section.card p, section.card li { font-size: 16px; }
+
+  /* Score card */
+  .score-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 28px; }
+  .score-badge {
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: var(--white);
+    width: 170px; height: 170px;
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    box-shadow: 0 10px 25px rgba(30, 58, 138, 0.25);
+    flex-shrink: 0;
+  }
+  .score-badge .num { font-size: 56px; font-weight: 700; line-height: 1; }
+  .score-badge .lbl { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+  .score-msg { flex: 1; min-width: 280px; }
+  .score-msg p { margin: 0 0 8px; }
+
+  /* Severity badges */
+  .badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 999px; font-size: 12px;
+    font-weight: 600; letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .badge.info     { background: var(--blue-soft); color: var(--blue-deep); }
+  .badge.warning  { background: #FEF3C7; color: var(--warn); }
+  .badge.critical { background: #FEE2E2; color: var(--bad); }
+
+  /* Issue */
+  .issue {
+    border-left: 4px solid var(--blue-mid);
+    background: #F8FAFC;
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin: 16px 0 24px;
+  }
+  .issue.warning  { border-left-color: var(--warn); }
+  .issue.critical { border-left-color: var(--bad); }
+  .issue h3 { margin-top: 0; }
+  .issue .why { background: var(--blue-soft); border-radius: 8px; padding: 12px 14px; margin: 12px 0; }
+  .issue .fix { background: #E0F2FE; border-radius: 8px; padding: 12px 14px; margin: 12px 0; }
+  .issue .why strong, .issue .fix strong { color: var(--blue-deep); }
+
+  /* Code blocks */
+  .code-label {
+    display: inline-block;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 4px 10px; border-radius: 6px 6px 0 0;
+    color: var(--white);
+  }
+  .code-label.before { background: #475569; }
+  .code-label.after  { background: var(--blue-deep); }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 14px 16px;
+    border-radius: 0 8px 8px 8px;
+    overflow-x: auto;
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  pre code { font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace; }
+  p code, li code {
+    background: var(--blue-soft); color: var(--blue-deep);
+    padding: 1px 6px; border-radius: 4px; font-size: 0.92em;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+  }
+
+  /* Highlight box (for the great section) */
+  .win {
+    background: var(--blue-soft);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 10px 0;
+  }
+  .win .title { font-weight: 700; color: var(--blue-deep); }
+
+  /* Lessons & next */
+  ol.lessons li, ul.lessons li { margin: 8px 0; }
+  .next-box {
+    background: linear-gradient(135deg, var(--blue-soft), #EFF6FF);
+    border: 2px dashed var(--blue-mid);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .next-box h3 { margin-top: 0; }
+
+  footer {
+    text-align: center;
+    color: var(--blue-deep);
+    margin-top: 30px;
+    font-size: 14px;
+    opacity: 0.85;
+  }
+  footer .signature { font-weight: 700; font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Tony's Python Code Review</h1>
+  <div class="sub">A friendly, honest review of your CS50P Final Project — the Guessing Game!</div>
+  <div class="meta">
+    <span class="pill">Reviewer: Tony — Your Python Mentor</span>
+    <span class="pill">Date: 2026-May-24</span>
+    <span class="pill">Files: project.py, GuessingBoard/Guessing_Board.py, test_project.py, question.csv</span>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- PROJECT SUMMARY                                -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>What You Built</h2>
+  <p>
+    Okay, first things first — pause and take this in: <strong>you built a real, working multiple-choice trivia game with a graphical user interface</strong>.
+    Not a script that prints to a terminal. A real <em>window</em>, with buttons, colors, fullscreen, a name-entry screen,
+    a scoring system, AND a saved leaderboard that ranks players by score. That's a <strong>huge</strong> project for CS50P.
+  </p>
+  <p>
+    Your game loads 10 questions from a CSV file, asks the player one at a time, gives them four colored buttons
+    (red A, blue B, green C, yellow D), grays them out after a click so you can't cheat, tracks their score, saves
+    their name to a leaderboard, and lets them restart. That's a complete experience from start to finish — and
+    that's exactly what CS50P wants to see for a final project.
+  </p>
+  <p>
+    So before we dig into the review: <strong>you should be proud</strong>. Now let's polish this thing together.
+  </p>
+</section>
+
+<!-- ============================================= -->
+<!-- OVERALL SCORE                                  -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Overall Score</h2>
+  <div class="score-wrap">
+    <div class="score-badge">
+      <div class="num">7.2</div>
+      <div class="lbl">out of 10</div>
+    </div>
+    <div class="score-msg">
+      <p>
+        <strong>This is a solid pass.</strong> The game works, it has a GUI, a class, exception handling, tests,
+        and CSV input/output — all the CS50P boxes are ticked. Your score is held back by a lot of <em>repetition</em>
+        (we'll fix that) and some <em>global variables</em> that make the code wobbly. But none of that means
+        the game is bad — it just means there's a clear path to make it amazing.
+      </p>
+      <p>
+        For CS50P submission: <strong>you should absolutely submit this</strong>. It will pass. The notes below
+        are for you, the future-developer-version-of-you.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- WHAT YOU DID GREAT                             -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>What You Did Great</h2>
+  <p>Let me point at <em>specific lines in your code</em> — because vague praise is cheap. Here's the real stuff:</p>
+
+  <div class="win">
+    <div class="title">You wrote a class with <code>@property</code> and a setter</div>
+    <p>
+      In <code>Guessing_Board.py</code> you used <code>@property</code> and <code>@counts.setter</code>.
+      Most CS50P students never touch properties — they're a Python superpower. You did it.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You used a dunder method (<code>__int__</code>)</div>
+    <p>
+      Defining <code>def __int__(self)</code> so that <code>int(game_op)</code> returns the score?
+      That's advanced. You're peeking into Python's data model and that's awesome curiosity.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You used specific exception types</div>
+    <p>
+      In <code>main()</code> you caught <code>FileNotFoundError</code>, <code>ValueError</code>, <code>IndexError</code>,
+      and <code>TypeError</code> separately and gave each one its own message. That's much better than a bare
+      <code>except:</code>. (We'll fine-tune <em>which</em> exception means what later, but the structure is right.)
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You wrote real pytest tests</div>
+    <p>
+      You imported your functions, used <code>pytest.raises</code>, and tested both happy paths and error paths.
+      That's exactly how CS50P wants tests written.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You added input validation</div>
+    <p>
+      Empty names? Blocked. Names with special characters like <code>@</code> or <code>#</code>? Blocked.
+      Duplicate names on the leaderboard? Blocked. You thought about <em>what could go wrong</em> — that's
+      how senior developers think.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">Polished UX details</div>
+    <p>
+      Fullscreen mode, <code>Escape</code> to exit fullscreen, color-coded answer buttons, graying out buttons
+      after a click, a quit button, a restart flow — you put real care into how it <em>feels</em> to play.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- CODE ISSUES                                    -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Things To Improve (with the WHY and the HOW)</h2>
+  <p>
+    Heads up: each of these is a learning opportunity, not a slap on the wrist. I'm going to be honest with you
+    because that's how you level up. Ready?
+  </p>
+
+  <!-- Issue 1: Repeated main_game functions -->
+  <div class="issue critical">
+    <h3>Issue 1 — Ten copies of the same function (<code>main_game1</code> … <code>main_game10</code>)
+      <span class="badge critical">Critical</span>
+    </h3>
+
+    <p>
+      You have 10 functions that all look almost identical. The only difference is which function they call next.
+      That's about 200 lines of code that say the same thing.
+    </p>
+
+    <span class="code-label before">Before</span>
+<pre><code>def main_game2(buttons, quits, question_title, question, A, B, C, D, ans, display):
+    global point, point2, counts
+    if point2 == point:
+        counts = counts + 1
+    point2 = point
+    game_op = GB.GuessingBoardOperator(point, counts)
+    question_title.config(text=f'{counts+1}. {question[counts]}')
+    ...
+    buttons[4].config(command=lambda: main_game3(buttons, quits, ...))   # &lt;-- only line that changes
+
+# main_game3 calls main_game4
+# main_game4 calls main_game5
+# ... all the way to main_game10 which calls end_game</code></pre>
+
+    <div class="why">
+      <strong>Why this is a problem:</strong> Imagine you find a bug — like the buttons are the wrong color.
+      You'd have to fix it in <em>ten places</em>. Miss one, and the bug stays. Programmers call this rule
+      <strong>DRY</strong>: <em>Don't Repeat Yourself.</em> If you're copy-pasting code, your code is asking
+      for a loop or a variable.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Replace all 10 functions with <em>one</em> function that tracks "which question
+      number am I on" as a parameter.
+    </div>
+
+    <span class="code-label after">After</span>
+<pre><code>TOTAL_QUESTIONS = 10
+
+def play_round(round_num, buttons, quits, question_title,
+               question, A, B, C, D, ans, display):
+    """One function that handles every round — round_num tells us which question."""
+    global point, point2, counts
+    if point2 == point:
+        counts += 1
+    point2 = point
+    game_op = GB.GuessingBoardOperator(point, counts)
+
+    question_title.config(text=f'{counts+1}. {question[counts]}')
+    choices = [(A, 'red'), (B, 'blue'), (C, 'green'), (D, 'yellow')]
+    for i, (choice_list, color) in enumerate(choices):
+        letter = "ABCD"[i]
+        others = [buttons[j] for j in range(4) if j != i]
+        buttons[i].config(
+            text=f"{letter}. {choice_list[counts]}",
+            bg=color,
+            fg='black' if color == 'yellow' else 'white',
+            command=lambda L=letter, o=others: config_display(game_op, display, L, ans, counts, o)
+        )
+
+    if round_num &lt; TOTAL_QUESTIONS:
+        buttons[4].config(command=lambda: play_round(round_num + 1, buttons, quits,
+                                                     question_title, question, A, B, C, D, ans, display))
+    else:
+        buttons[4].config(command=lambda: end_game(question_title, buttons, quits,
+                                                   question, A, B, C, D, ans))</code></pre>
+    <p style="margin-top:8px;">
+      Now if you want 20 questions instead of 10? Change <code>TOTAL_QUESTIONS = 10</code> to <code>20</code>.
+      That's it. One line. <em>That</em> is the magic of DRY.
+    </p>
+  </div>
+
+  <!-- Issue 2: Repeated CSV parsing -->
+  <div class="issue critical">
+    <h3>Issue 2 — Six functions to read one CSV file
+      <span class="badge critical">Critical</span>
+    </h3>
+
+    <p>
+      <code>get_question</code>, <code>get_a</code>, <code>get_b</code>, <code>get_c</code>, <code>get_d</code>,
+      and <code>get_ans</code> all open the same file, loop through the same rows, and return one column each.
+      You're opening the file <strong>6 times</strong> on startup.
+    </p>
+
+    <span class="code-label before">Before</span>
+<pre><code>def get_question(f):
+    with open(f, 'r') as file:
+        questions = []
+        count = 0
+        question = csv.DictReader(file)
+        for row in question:
+            if count != 0:
+                questions.append(str(list(row.values())[0][0]))
+            count = count + 1
+        ...
+        return questions
+
+def get_a(f):
+    with open(f, 'r') as file:
+        A = []
+        count = 0
+        a = csv.DictReader(file)
+        for row in a:
+            if count != 0:
+                A.append(str(list(row.values())[0][1]))
+            count = count + 1
+        ...
+        return A
+
+# ... and four more just like this</code></pre>
+
+    <div class="why">
+      <strong>Why this is a problem (three reasons):</strong>
+      <ol>
+        <li><strong>Slow:</strong> You read the file 6 times instead of 1. With a tiny CSV nobody notices, but it's wasteful.</li>
+        <li><strong>Bug-prone:</strong> If the CSV format changes, you must update 6 functions. Easy to forget one.</li>
+        <li><strong>Hidden bug:</strong> <code>csv.DictReader</code> already skips the header row! Your <code>if count != 0</code>
+            then skips the <em>first real question</em>. That means your game is actually skipping question #1 from the file
+            in some interpretations of the code. Also, <code>list(row.values())[0][0]</code> is reading <em>character 0 of the
+            first column value</em> — not the column you think. It works by accident here.</li>
+      </ol>
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Read the CSV once. Return all columns as a dictionary or a list of dicts.
+    </div>
+
+    <span class="code-label after">After</span>
+<pre><code>def load_questions(path):
+    """Read the question CSV once and return all columns."""
+    with open(path, 'r') as file:
+        rows = list(csv.DictReader(file))   # DictReader already skips header
+
+    if len(rows) &lt; 10:
+        raise ValueError("Need at least 10 questions in the file")
+
+    questions = [r['question'] for r in rows]
+    choices_a = [r['choice_a'] for r in rows]
+    choices_b = [r['choice_b'] for r in rows]
+    choices_c = [r['choice_c'] for r in rows]
+    choices_d = [r['choice_d'] for r in rows]
+    answers   = [r['ans'].upper() for r in rows]
+
+    for q in questions:
+        if len(q) &gt; 45:
+            raise ValueError(f"Question too long: {q}")
+    for a in answers:
+        if a not in {'A', 'B', 'C', 'D'}:
+            raise ValueError(f"Answer must be A/B/C/D, got: {a}")
+
+    return questions, choices_a, choices_b, choices_c, choices_d, answers</code></pre>
+    <p style="margin-top:8px;">
+      Six functions → one. One file read instead of six. And it uses real column names (<code>r['question']</code>)
+      instead of fragile <code>[0][0]</code> indexing. Cleaner, faster, safer.
+    </p>
+  </div>
+
+  <!-- Issue 3: Global variables -->
+  <div class="issue warning">
+    <h3>Issue 3 — Global variables everywhere
+      <span class="badge warning">Warning</span>
+    </h3>
+
+    <p>
+      At the top of the file you have <code>name = None</code>, <code>point = 0</code>, <code>counts = 0</code>,
+      <code>point2 = 0</code>, and inside almost every function you write <code>global point</code>,
+      <code>global counts</code>, etc.
+    </p>
+
+    <span class="code-label before">Before</span>
+<pre><code>name = None
+point = 0
+counts = 0
+point2 = 0
+
+def config_display(game_op, display, u_ans, ans, count, bottons):
+    global point
+    global counts
+    point2 = point
+    game_op.get_point(u_ans, ans, count, bottons)
+    point = (int(game_op))
+    counts = game_op.counts
+    display.config(text=f"point: {point}")</code></pre>
+
+    <div class="why">
+      <strong>Why this is a problem:</strong> Globals are like a whiteboard everyone in the room can erase
+      without telling you. Any function — anywhere — can change <code>point</code>. When something goes wrong,
+      it's almost impossible to figure out <em>who changed it last</em>. It also makes testing way harder, because
+      every test starts with whatever the last test left behind. Pros call this "spooky action at a distance."
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> You already have a <code>GuessingBoardOperator</code> class — put the state
+      <em>inside</em> it. Then you don't need any globals.
+    </div>
+
+    <span class="code-label after">After</span>
+<pre><code>class GameState:
+    def __init__(self):
+        self.player_name = ""
+        self.point = 0
+        self.question_index = 0
+        self.already_answered = False
+
+    def record_answer(self, user_choice, correct_answer):
+        if self.already_answered:
+            return
+        if user_choice == correct_answer:
+            self.point += 1
+        self.already_answered = True
+
+    def next_question(self):
+        self.question_index += 1
+        self.already_answered = False
+
+# Then pass `state` into your functions instead of using globals:
+def config_display(state, game_op, display, u_ans, ans, buttons):
+    state.record_answer(u_ans, ans[state.question_index])
+    display.config(text=f"Point: {state.point}")</code></pre>
+  </div>
+
+  <!-- Issue 4: Wrong exception types -->
+  <div class="issue warning">
+    <h3>Issue 4 — Using <code>TypeError</code> for "not enough questions"
+      <span class="badge warning">Warning</span>
+    </h3>
+
+    <p>
+      In every <code>get_*</code> function you have:
+    </p>
+    <span class="code-label before">Before</span>
+<pre><code>if len(questions) &lt; 10:
+    raise TypeError</code></pre>
+
+    <div class="why">
+      <strong>Why this is wrong:</strong> <code>TypeError</code> means "you gave me the wrong <em>kind</em> of thing"
+      — like passing a string when an integer was expected. "Not enough items in a list" isn't a type problem,
+      it's a <em>value</em> problem. The right exception is <code>ValueError</code> ("the type is fine, but the
+      value isn't acceptable").
+      <br><br>
+      Also: you <code>raise TypeError</code> with no message, so when it triggers the user sees nothing useful.
+      Always include a message.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong>
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>if len(questions) &lt; 10:
+    raise ValueError("The question file must contain at least 10 questions")</code></pre>
+
+    <p style="margin-top:8px;">
+      Then in <code>main()</code>, your <code>except ValueError</code> branch catches it with a clear message.
+      Plus your test <code>test_get_question</code> currently expects <code>TypeError</code> for the "not enough"
+      case — that test is testing your bug, not your function.
+    </p>
+  </div>
+
+  <!-- Issue 5: Test file issues -->
+  <div class="issue warning">
+    <h3>Issue 5 — Duplicate test function name (only one runs!)
+      <span class="badge warning">Warning</span>
+    </h3>
+
+    <p>
+      In <code>test_project.py</code> you defined <code>test_get_point1</code> <strong>twice</strong>:
+    </p>
+    <span class="code-label before">Before</span>
+<pre><code>def test_get_point1():
+    game_op = GB.GuessingBoardOperator()
+    ...
+    assert game_op.get_point('A', ['A','B','D'], 1, [B,A]) == 0   # wrong answer test
+
+def test_get_point1():   # &lt;-- SAME NAME!
+    game_op = GB.GuessingBoardOperator()
+    ...
+    assert game_op.get_point('A', ['A','B','D'], 0, [B,A]) == 1   # right answer test</code></pre>
+
+    <div class="why">
+      <strong>Why this is bad:</strong> In Python, when you define a function with the same name twice, the
+      second one <em>silently replaces</em> the first. Pytest only sees the second test. The first one — the
+      "wrong answer" case — <strong>never runs</strong>. You wrote it, you committed it, but it's dead code.
+      You think you have two tests; you actually have one.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Give them different names that describe what they test.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>def test_get_point_wrong_answer():
+    game_op = GB.GuessingBoardOperator()
+    B = Button(text='idk'); A = Button(text='idk')
+    assert game_op.get_point('A', ['A','B','D'], 1, [B,A]) == 0
+
+def test_get_point_correct_answer():
+    game_op = GB.GuessingBoardOperator()
+    B = Button(text='idk'); A = Button(text='idk')
+    assert game_op.get_point('A', ['A','B','D'], 0, [B,A]) == 1</code></pre>
+  </div>
+
+  <!-- Issue 6: Tests depend on real files -->
+  <div class="issue info">
+    <h3>Issue 6 — Tests depend on real CSV files in the folder
+      <span class="badge info">Info</span>
+    </h3>
+
+    <p>
+      Your tests call <code>get_ans('question.csv')</code>, <code>get_ans('wrong.csv')</code>,
+      <code>get_ans('not_enough.csv')</code>. If those files aren't sitting in the folder when someone runs
+      your tests, the tests crash for the wrong reason.
+    </p>
+
+    <div class="why">
+      <strong>Why this matters:</strong> Tests should be self-contained — anyone, anywhere should be able to
+      clone your project and run <code>pytest</code> without preparing files first. Pytest has a special tool
+      called <code>tmp_path</code> that creates a temporary folder for each test.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong>
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>def test_get_ans_raises_when_too_few(tmp_path):
+    csv_file = tmp_path / "small.csv"
+    csv_file.write_text("question,choice_a,choice_b,choice_c,choice_d,ans\n"
+                        "q1,a,b,c,d,A\n")
+    with pytest.raises(ValueError):
+        get_ans(str(csv_file))</code></pre>
+  </div>
+
+  <!-- Issue 7: leaderboard reset bug -->
+  <div class="issue critical">
+    <h3>Issue 7 — The "reset" function quietly deletes the last leaderboard entry
+      <span class="badge critical">Critical</span>
+    </h3>
+
+    <span class="code-label before">Before</span>
+<pre><code>def reset(bottons, quits, question_title, question, A, B, C, D, ans):
+    ...
+    max_len = len(read_leaderboard())
+    if max_len != 0:
+        max_len = max_len - 1     # &lt;-- subtracts 1 for no clear reason
+    player = []
+    s = []
+    for i in range(max_len):       # &lt;-- loops one short of the real length
+        player.append(read_leaderboard_xSort()[i]['player'])
+        s.append(read_leaderboard_xSort()[i]['score'])
+    with open('leaderboard.csv', "w") as file_name:
+        ...
+        for i in range(max_len):
+            writer.writerow({'player': player[i], 'score': s[i]})</code></pre>
+
+    <div class="why">
+      <strong>Why this is a bug:</strong> <code>max_len = max_len - 1</code> means every time someone clicks
+      "restart," the <em>last player on the leaderboard gets deleted</em>. Player by player, your leaderboard
+      shrinks. That's almost certainly not what you wanted.
+      <br><br>
+      Also: <code>read_leaderboard_xSort()</code> is called inside a loop, which opens and re-reads the file
+      every iteration. Call it once, save the result.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong>
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>def reset(buttons, quits, question_title, question, A, B, C, D, ans):
+    global point, counts
+    point = 0
+    counts = 0
+    # No need to rewrite leaderboard.csv on reset — leave it alone!
+    main_game1(buttons, quits, question_title, question, A, B, C, D, ans)</code></pre>
+    <p style="margin-top:8px;">
+      Unless you have a specific reason to rewrite the file on reset, just don't touch it. The simplest code
+      is the code that isn't there.
+    </p>
+  </div>
+
+  <!-- Issue 8: Star import & naming -->
+  <div class="issue info">
+    <h3>Issue 8 — Star imports and inconsistent naming
+      <span class="badge info">Info</span>
+    </h3>
+
+    <p>You wrote:</p>
+    <span class="code-label before">Before</span>
+<pre><code>from tkinter import *
+
+# Variables named like:
+bottons = [a, b, c, d]   # typo: should be "buttons"
+A, B, C, D = ...          # uppercase for lists is unusual
+point2 = ...              # what is point2?</code></pre>
+
+    <div class="why">
+      <strong>Why this matters:</strong>
+      <ul>
+        <li><code>from tkinter import *</code> dumps <em>every</em> tkinter name into your file. If tkinter ever
+            adds a name that clashes with one of yours, you get a weird bug. Use <code>import tkinter as tk</code>
+            and write <code>tk.Button</code>, <code>tk.Label</code>, etc.</li>
+        <li><code>bottons</code> is a typo of <code>buttons</code> — it works, but other people (and future-you)
+            will trip on it. Names should be exactly what they mean.</li>
+        <li>Uppercase like <code>A</code>, <code>B</code> is conventionally for <em>classes</em>. Lists should
+            be lowercase: <code>choices_a</code>, <code>choices_b</code>.</li>
+        <li><code>point2</code> doesn't say what it does. A better name: <code>previous_point</code> or
+            <code>last_recorded_point</code>.</li>
+      </ul>
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong>
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>import tkinter as tk
+import csv
+
+buttons = [a, b, c, d]
+choices_a, choices_b, choices_c, choices_d = ...
+previous_point = 0
+
+# And then use it:
+window = tk.Tk()
+label = tk.Label(window, text="Hello")</code></pre>
+  </div>
+
+  <!-- Issue 9: The "doesn't work in this file" comment -->
+  <div class="issue warning">
+    <h3>Issue 9 — That mysterious comment at the top of the file
+      <span class="badge warning">Warning</span>
+    </h3>
+
+    <span class="code-label before">Before</span>
+<pre><code>#does not work on this file use pycharm or vs code instead</code></pre>
+
+    <div class="why">
+      <strong>Why this is a red flag:</strong> If the grader sees this, they're going to wonder "wait, does
+      this code work or not?" The comment is honest but it scares people. The real meaning is probably
+      "VS Code's input prompt doesn't print nicely" — which is fine, but the comment doesn't say that.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Either delete it, or rewrite it to explain clearly:
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>"""
+Guessing Game — a CS50P final project.
+
+Run from a terminal:    python project.py
+(Some IDEs render input() prompts oddly; PyCharm/VS Code work great.)
+"""</code></pre>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- LESSONS LEARNED                                -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Lessons Learned (the big ideas)</h2>
+  <ol class="lessons">
+    <li>
+      <strong>DRY — Don't Repeat Yourself.</strong> If you're copy-pasting code, ask: "Can this be a loop?
+      A parameter? A class?" Repetition is a signal, not a solution.
+    </li>
+    <li>
+      <strong>Globals are quicksand.</strong> They feel easy at first, but the deeper you go, the harder it
+      is to climb out. Pass state through parameters, or store it in a class. Future-you will say thank you.
+    </li>
+    <li>
+      <strong>Pick the right exception.</strong> <code>ValueError</code> = wrong value, right type.
+      <code>TypeError</code> = wrong type entirely. Always include a message so the user knows what happened.
+    </li>
+    <li>
+      <strong>Duplicate function names silently overwrite each other.</strong> Python doesn't warn you.
+      One name = one function. Always.
+    </li>
+    <li>
+      <strong>Use <code>csv.DictReader</code> by column name, not by index.</strong> <code>row['question']</code>
+      is clear; <code>list(row.values())[0][0]</code> is a puzzle. Code should read like a sentence.
+    </li>
+  </ol>
+</section>
+
+<!-- ============================================= -->
+<!-- NEXT CHALLENGE                                 -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Your Next Challenge</h2>
+  <div class="next-box">
+    <h3>Refactor the 10 <code>main_game</code> functions into ONE</h3>
+    <p>
+      This is the single biggest level-up you can do. Take your <code>main_game1</code>, <code>main_game2</code>,
+      … <code>main_game10</code>, and merge them into one function called <code>play_round(round_num, ...)</code>
+      that uses an <code>if round_num &lt; 10: call_self_with_next_round else: end_game()</code> at the bottom.
+    </p>
+    <p>
+      Don't worry about doing it perfectly the first time. Try it. Break it. Fix it. When it works, your file
+      will shrink by about 150 lines, and you'll feel that <em>amazing</em> feeling of code getting smaller
+      while doing the same thing. That's the joy of refactoring — and once you taste it, you can't go back.
+    </p>
+    <p style="margin-bottom:0;">
+      Stretch goal after that: get rid of <em>all</em> globals. Make a <code>GameState</code> class to hold
+      <code>point</code>, <code>counts</code>, and <code>name</code>, and pass <code>state</code> into every
+      function. You can do this. I believe in you.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- FINAL ENCOURAGEMENT                            -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>One Last Thing — About Your CS50P Submission</h2>
+  <p>
+    <strong>Submit this project.</strong> Seriously. It meets every CS50P requirement:
+  </p>
+  <ul>
+    <li>A <code>main()</code> function and at least three other functions — check.</li>
+    <li>A <code>test_project.py</code> with pytest tests — check.</li>
+    <li>A custom class with methods — check (and you even used <code>@property</code>!).</li>
+    <li>Uses external libraries (<code>tkinter</code>, <code>csv</code>) — check.</li>
+    <li>Reads from / writes to files — check.</li>
+  </ul>
+  <p>
+    The issues we talked about today are about <em>going from good to great</em>, not about whether this passes.
+    It will pass. You built something real. Now go submit it, take a deep breath, and start working on that
+    refactor for fun.
+  </p>
+  <p>
+    You're 13 years old and you wrote a working GUI game in Python with a class, exception handling, and tests.
+    A lot of professional developers I know couldn't have done this at your age. Keep going. You're a real coder.
+  </p>
+</section>
+
+<footer>
+  <div class="signature">Reviewed by Tony · Your Python Mentor</div>
+  <div>2026-May-24</div>
+</footer>
+
+</div>
+</body>
+</html>
