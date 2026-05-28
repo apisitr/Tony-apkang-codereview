@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CS50P Project Portal — da Guess'in Game</title>
+<title>CS50P Report Portal — da Guess'in Game</title>
 <style>
   :root {
     --blue-deep: #1E3A8A;
@@ -11,8 +11,13 @@
     --blue-soft: #DBEAFE;
     --white:     #FFFFFF;
     --ink:       #0F172A;
-    --code-bg:   #1E293B;
-    --code-fg:   #E2E8F0;
+    --green:     #16A34A;
+    --green-soft:#DCFCE7;
+    --amber:     #D97706;
+    --amber-soft:#FEF3C7;
+    --red:       #DC2626;
+    --red-soft:  #FEE2E2;
+    --slate:     #64748B;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -29,35 +34,35 @@
   /* ── Hero ── */
   .hero {
     text-align: center;
-    margin-bottom: 48px;
+    margin-bottom: 40px;
     max-width: 720px;
   }
   .hero .badge-top {
     display: inline-block;
     background: var(--blue-deep);
     color: var(--white);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 1.2px;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
     padding: 6px 16px;
     border-radius: 999px;
     margin-bottom: 18px;
   }
   .hero h1 {
-    font-size: clamp(32px, 5vw, 52px);
+    font-size: clamp(28px, 4.5vw, 46px);
     font-weight: 800;
     color: var(--blue-deep);
-    line-height: 1.15;
-    margin-bottom: 14px;
+    line-height: 1.2;
+    margin-bottom: 12px;
   }
   .hero h1 span { color: var(--blue-mid); }
   .hero p {
-    font-size: 17px;
+    font-size: 16px;
     color: #475569;
     line-height: 1.65;
-    max-width: 560px;
-    margin: 0 auto 24px;
+    max-width: 520px;
+    margin: 0 auto 20px;
   }
   .hero .meta-pills {
     display: flex; flex-wrap: wrap; gap: 8px;
@@ -67,136 +72,190 @@
     background: var(--white);
     border: 1px solid #CBD5E1;
     color: #475569;
-    font-size: 13px;
-    padding: 5px 14px;
+    font-size: 12px;
+    padding: 4px 13px;
     border-radius: 999px;
   }
 
-  /* ── Card grid ── */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+  /* ── Section ── */
+  .section {
     width: 100%;
     max-width: 960px;
+    margin-bottom: 36px;
   }
-
-  /* ── Portal card ── */
-  .card {
-    background: var(--white);
-    border: 1px solid #E2E8F0;
-    border-radius: 18px;
-    padding: 28px 26px;
-    box-shadow: 0 4px 20px rgba(30, 58, 138, 0.07);
+  .section-header {
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #E2E8F0;
   }
-  .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(30, 58, 138, 0.13);
-  }
-  .card .icon {
-    width: 52px; height: 52px;
-    border-radius: 14px;
+  .section-header .section-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
+    font-size: 20px;
+    flex-shrink: 0;
   }
-  .card .icon.blue  { background: var(--blue-soft); }
-  .card .icon.green { background: #DCFCE7; }
-  .card .icon.amber { background: #FEF3C7; }
-  .card .icon.slate { background: #F1F5F9; }
-  .card h2 {
-    font-size: 19px;
+  .section-header h2 {
+    font-size: 20px;
     font-weight: 700;
     color: var(--blue-deep);
   }
-  .card p {
-    font-size: 14.5px;
-    color: #64748B;
-    line-height: 1.6;
-    flex: 1;
+  .section-header .count {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    padding: 3px 10px;
+    border-radius: 999px;
   }
-  .card a.btn {
+
+  /* ── Report list ── */
+  .report-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .report-item {
+    background: var(--white);
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 10px rgba(30,58,138,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  .report-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30,58,138,0.11);
+    border-color: var(--blue-mid);
+  }
+  .report-item .item-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .report-item .item-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .report-item .item-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--blue-deep);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .report-item .item-desc {
+    font-size: 13px;
+    color: var(--slate);
+    line-height: 1.5;
+  }
+  .report-item .item-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .tag.review  { background: var(--blue-soft);  color: var(--blue-deep); }
+  .tag.issue   { background: var(--amber-soft); color: var(--amber); }
+  .tag.latest  { background: var(--green-soft); color: var(--green); }
+  .tag.old     { background: #F1F5F9;           color: var(--slate); }
+  .score-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
     color: var(--white);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: 10px;
-    transition: opacity 0.15s ease;
-    align-self: flex-start;
-  }
-  .card a.btn:hover { opacity: 0.88; }
-  .card a.btn.ghost {
-    background: none;
-    color: var(--blue-deep);
-    border: 2px solid var(--blue-soft);
-  }
-  .card a.btn.ghost:hover { background: var(--blue-soft); }
-
-  /* score badge inside card */
-  .score-inline {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
-    color: var(--white);
-    padding: 6px 14px;
+    padding: 4px 12px;
     border-radius: 999px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    align-self: flex-start;
+  }
+  .arrow {
+    font-size: 18px;
+    color: #CBD5E1;
+    flex-shrink: 0;
+    margin-left: 4px;
   }
 
-  /* ── Info row ── */
-  .info-row {
-    max-width: 960px;
+  /* ── Quick links row ── */
+  .quick-links {
     width: 100%;
-    margin-top: 32px;
+    max-width: 960px;
     background: var(--white);
     border: 1px solid #E2E8F0;
     border-radius: 14px;
-    padding: 22px 26px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-start;
+    padding: 20px 24px;
     box-shadow: 0 2px 10px rgba(30,58,138,0.05);
+    margin-bottom: 36px;
   }
-  .info-row h3 {
-    font-size: 15px;
+  .quick-links h3 {
+    font-size: 14px;
     font-weight: 700;
     color: var(--blue-deep);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
   }
-  .info-row .col { flex: 1; min-width: 200px; }
-  .info-row code {
-    background: var(--blue-soft);
-    color: var(--blue-deep);
-    padding: 2px 7px;
-    border-radius: 5px;
+  .link-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .link-chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    color: #334155;
+    text-decoration: none;
     font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: background 0.15s, border-color 0.15s;
     font-family: "SF Mono", Consolas, Menlo, monospace;
   }
-  .info-row ul { list-style: none; padding: 0; }
-  .info-row ul li {
-    font-size: 14px;
-    color: #475569;
-    padding: 3px 0;
+  .link-chips a:hover {
+    background: var(--blue-soft);
+    border-color: var(--blue-mid);
+    color: var(--blue-deep);
   }
-  .info-row ul li::before { content: "→ "; color: var(--blue-mid); font-weight: 700; }
 
   footer {
-    margin-top: 48px;
+    margin-top: 8px;
     font-size: 13px;
     color: #94A3B8;
     text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .report-item { flex-wrap: wrap; }
+    .report-item .item-meta { flex-direction: row; align-items: center; }
+    .arrow { display: none; }
   }
 </style>
 </head>
@@ -204,107 +263,102 @@
 
 <!-- ── Hero ── -->
 <div class="hero">
-  <div class="badge-top">CS50P Final Project</div>
-  <h1>da <span>Guess'in</span> Game<br>Project Portal</h1>
+  <div class="badge-top">CS50P Final Project · Report Portal</div>
+  <h1>da <span>Guess'in</span> Game<br>Report Center</h1>
   <p>
-    A fullscreen multiple-choice trivia game built with Python &amp; tkinter,
-    complete with a CSV question loader, real-time scoring, and a persistent leaderboard.
+    รวม code review, issue reports และ mentor feedback
+    จาก Tony Python Mentor สำหรับโปรเจกต์ CS50P นี้
   </p>
   <div class="meta-pills">
     <span class="pill">Python 3</span>
     <span class="pill">tkinter GUI</span>
     <span class="pill">CSV I/O</span>
     <span class="pill">pytest</span>
-    <span class="pill">OOP + @property</span>
+    <span class="pill">OOP</span>
   </div>
 </div>
 
-<!-- ── Card grid ── -->
-<div class="grid">
-
-  <!-- Tony Review -->
-  <div class="card">
-    <div class="icon blue">🧑‍🏫</div>
-    <div class="score-inline">7.2 / 10</div>
-    <h2>Tony's Code Review</h2>
-    <p>
-      A detailed, mentor-style HTML report covering what was done great,
-      9 specific issues to improve (with before/after code), and encouragement
-      for the CS50P submission.
-    </p>
-    <a class="btn" href="tony_review.html">Open Report →</a>
+<!-- ── Reviews Section ── -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#DBEAFE;">🧑‍🏫</div>
+    <h2>Code Reviews</h2>
+    <span class="count">2 reports</span>
   </div>
+  <div class="report-list">
 
-  <!-- Source: project.py -->
-  <div class="card">
-    <div class="icon green">🐍</div>
-    <h2>Main Program</h2>
-    <p>
-      <code>project.py</code> — Entry point. Handles CSV loading,
-      tkinter GUI flow (main menu → name entry → 10 questions → end screen),
-      leaderboard read/write, and input validation.
-    </p>
-    <a class="btn ghost" href="project.py">View Source</a>
+    <!-- v1 latest review -->
+    <a class="report-item" href="reviews/tony_review_28may2026_v1.html">
+      <div class="item-icon" style="background:#DBEAFE;">📋</div>
+      <div class="item-body">
+        <div class="item-title">Tony's Code Review — 28 May 2026 · v1</div>
+        <div class="item-desc">Review รอบที่ 2 หลังจาก refactor ครั้งใหญ่ — ครอบคลุม critical issues, สิ่งที่ fix แล้ว และ learning moments</div>
+      </div>
+      <div class="item-meta">
+        <span class="tag latest">Latest</span>
+        <span class="score-badge">⭐ 8.1 / 10</span>
+      </div>
+      <span class="arrow">›</span>
+    </a>
+
+    <!-- original review -->
+    <a class="report-item" href="reviews/tony_review.html">
+      <div class="item-icon" style="background:#F1F5F9;">📄</div>
+      <div class="item-body">
+        <div class="item-title">Tony's Code Review — Original Draft</div>
+        <div class="item-desc">Review รอบแรก ก่อน refactor — baseline สำหรับเทียบความก้าวหน้า</div>
+      </div>
+      <div class="item-meta">
+        <span class="tag old">v0 · Draft</span>
+        <span class="score-badge">⭐ 7.2 / 10</span>
+      </div>
+      <span class="arrow">›</span>
+    </a>
+
   </div>
-
-  <!-- Source: GuessingBoard -->
-  <div class="card">
-    <div class="icon amber">🎯</div>
-    <h2>Game Logic Class</h2>
-    <p>
-      <code>GuessingBoard/Guessing_Board.py</code> — <code>GuessingBoardOperator</code>
-      class with scoring logic, <code>@property</code> / setter, and
-      a custom <code>__int__</code> dunder method.
-    </p>
-    <a class="btn ghost" href="GuessingBoard/Guessing_Board.py">View Source</a>
-  </div>
-
-  <!-- Tests -->
-  <div class="card">
-    <div class="icon slate">🧪</div>
-    <h2>Test Suite</h2>
-    <p>
-      <code>test_project.py</code> — pytest tests covering CSV parsing
-      (<code>get_question</code>, <code>get_ans</code>) and game scoring
-      logic with <code>pytest.raises</code> for error paths.
-    </p>
-    <a class="btn ghost" href="test_project.py">View Tests</a>
-  </div>
-
 </div>
 
-<!-- ── Info row ── -->
-<div class="info-row">
-  <div class="col">
-    <h3>How to Run</h3>
-    <ul>
-      <li>Open in PyCharm or VS Code</li>
-      <li>Run <code>python project.py</code></li>
-      <li>Enter path: <code>question.csv</code></li>
-      <li>Press <code>Escape</code> to exit fullscreen</li>
-    </ul>
+<!-- ── Issues Section ── -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#FEF3C7;">🔍</div>
+    <h2>Issue Reports</h2>
+    <span class="count">1 report</span>
   </div>
-  <div class="col">
-    <h3>How to Test</h3>
-    <ul>
-      <li>Run <code>pytest test_project.py</code></li>
-      <li>Single test: <code>pytest test_project.py::test_get_question</code></li>
-      <li>Requires <code>question.csv</code> in project root</li>
-    </ul>
+  <div class="report-list">
+
+    <a class="report-item" href="issues/tony_issue_28may2026_v1.html">
+      <div class="item-icon" style="background:#FEF3C7;">🐛</div>
+      <div class="item-body">
+        <div class="item-title">Issue Tracker — 28 May 2026 · v1</div>
+        <div class="item-desc">รายการ issues จำแนกตามระดับ Critical / Warning / Suggestion พร้อม code snippet และวิธีแก้</div>
+      </div>
+      <div class="item-meta">
+        <span class="tag issue">Issues</span>
+        <span class="tag latest">Latest</span>
+      </div>
+      <span class="arrow">›</span>
+    </a>
+
   </div>
-  <div class="col">
-    <h3>CSV Format</h3>
-    <ul>
-      <li>Columns: <code>question, choice_a … choice_d, ans</code></li>
-      <li>Minimum <strong>10</strong> question rows</li>
-      <li>Question max <strong>45</strong> characters</li>
-      <li>Answer must be <code>A</code> / <code>B</code> / <code>C</code> / <code>D</code></li>
-    </ul>
+</div>
+
+<!-- ── Quick Source Links ── -->
+<div class="quick-links">
+  <h3>Source Files</h3>
+  <div class="link-chips">
+    <a href="../project.py">📄 project.py</a>
+    <a href="../GuessingBoard/GuessingBoardOperator.py">🎯 GuessingBoardOperator.py</a>
+    <a href="../GuessingBoard/GuessingBoardOperator_GUI.py">🖥️ GuessingBoardOperator_GUI.py</a>
+    <a href="../GuessingBoard/GuessingBoardOperator_leaderboard.py">🏆 GuessingBoardOperator_leaderboard.py</a>
+    <a href="../test_project.py">🧪 test_project.py</a>
+    <a href="../question.csv">📊 question.csv</a>
+    <a href="../leaderboard.csv">📈 leaderboard.csv</a>
   </div>
 </div>
 
 <footer>
-  CS50P Final Project &nbsp;·&nbsp; Reviewed by Tony Python Mentor &nbsp;·&nbsp; 2026-May-24
+  CS50P Final Project &nbsp;·&nbsp; Reviewed by Tony Python Mentor &nbsp;·&nbsp; 2026-May-28
 </footer>
 
 </body>

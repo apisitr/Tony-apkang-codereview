@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tony's Code Review v2 — CS50P Guessing Game (28 May 2026)</title>
+<style>
+  :root {
+    --blue-deep: #1E3A8A;
+    --blue-mid:  #3B82F6;
+    --blue-soft: #DBEAFE;
+    --white:     #FFFFFF;
+    --ink:       #0F172A;
+    --code-bg:   #1E293B;
+    --code-fg:   #E2E8F0;
+    --good:      #16A34A;
+    --good-soft: #DCFCE7;
+    --warn:      #D97706;
+    --warn-soft: #FEF3C7;
+    --bad:       #DC2626;
+    --bad-soft:  #FEE2E2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.65;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* Header */
+  header.hero {
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: var(--white);
+    padding: 44px 36px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(30, 58, 138, 0.18);
+    margin-bottom: 32px;
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 36px; letter-spacing: -0.5px; }
+  header.hero .sub { opacity: 0.95; font-size: 17px; }
+  header.hero .meta {
+    margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;
+    font-size: 14px;
+  }
+  header.hero .pill {
+    background: rgba(255,255,255,0.15);
+    padding: 6px 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+
+  /* Section card */
+  section.card {
+    background: var(--white);
+    border: 1px solid var(--blue-soft);
+    border-radius: 14px;
+    padding: 28px 30px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.06);
+  }
+  section.card h2 {
+    margin: 0 0 16px;
+    color: var(--blue-deep);
+    font-size: 26px;
+    border-bottom: 3px solid var(--blue-soft);
+    padding-bottom: 10px;
+  }
+  section.card h3 {
+    color: var(--blue-deep);
+    margin-top: 22px;
+    margin-bottom: 8px;
+    font-size: 18px;
+  }
+  section.card p, section.card li { font-size: 16px; }
+
+  /* Win cards */
+  .win {
+    background: var(--good-soft);
+    border-left: 5px solid var(--good);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 12px 0;
+  }
+  .win .title { font-weight: 700; color: #166534; font-size: 17px; }
+  .win p { margin: 6px 0 0; }
+
+  .strength {
+    background: var(--blue-soft);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 10px 0;
+  }
+  .strength .title { font-weight: 700; color: var(--blue-deep); }
+
+  /* Score */
+  .score-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 28px; }
+  .score-badge {
+    background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+    color: var(--white);
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    box-shadow: 0 10px 25px rgba(30, 58, 138, 0.25);
+    flex-shrink: 0;
+  }
+  .score-badge .num { font-size: 60px; font-weight: 700; line-height: 1; }
+  .score-badge .lbl { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+  .score-trend {
+    display: inline-block;
+    background: var(--good-soft);
+    color: #166534;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; margin-top: 6px;
+  }
+  .score-msg { flex: 1; min-width: 280px; }
+
+  /* Severity badges */
+  .badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 999px; font-size: 12px;
+    font-weight: 700; letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .badge.info     { background: var(--blue-soft); color: var(--blue-deep); }
+  .badge.warning  { background: var(--warn-soft); color: var(--warn); }
+  .badge.critical { background: var(--bad-soft); color: var(--bad); }
+  .badge.fixed    { background: var(--good-soft); color: #166534; }
+
+  /* Issue */
+  .issue {
+    border-left: 5px solid var(--blue-mid);
+    background: #F8FAFC;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 16px 0 24px;
+  }
+  .issue.warning  { border-left-color: var(--warn); background: #FFFBEB; }
+  .issue.critical { border-left-color: var(--bad); background: #FFF5F5; }
+  .issue.info     { border-left-color: var(--blue-mid); background: #F0F9FF; }
+  .issue h3 { margin-top: 0; }
+  .issue .where {
+    font-size: 13px; color: #475569;
+    background: #E2E8F0; display: inline-block;
+    padding: 3px 10px; border-radius: 6px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    margin-bottom: 10px;
+  }
+  .issue .why { background: var(--blue-soft); border-radius: 8px; padding: 12px 14px; margin: 12px 0; }
+  .issue .fix { background: #E0F2FE; border-radius: 8px; padding: 12px 14px; margin: 12px 0; }
+  .issue .why strong, .issue .fix strong { color: var(--blue-deep); }
+
+  /* Code blocks */
+  .code-label {
+    display: inline-block;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 4px 10px; border-radius: 6px 6px 0 0;
+    color: var(--white);
+  }
+  .code-label.before { background: #475569; }
+  .code-label.after  { background: var(--blue-deep); }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 14px 16px;
+    border-radius: 0 8px 8px 8px;
+    overflow-x: auto;
+    margin: 0 0 14px;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  pre code { font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace; }
+  p code, li code, td code {
+    background: var(--blue-soft); color: var(--blue-deep);
+    padding: 1px 6px; border-radius: 4px; font-size: 0.92em;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+  }
+
+  /* Lessons & next */
+  ol.lessons li, ul.lessons li { margin: 8px 0; }
+  .next-box {
+    background: linear-gradient(135deg, var(--blue-soft), #EFF6FF);
+    border: 2px dashed var(--blue-mid);
+    border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .next-box h3 { margin-top: 0; }
+
+  /* Table */
+  .summary-table {
+    width: 100%; border-collapse: collapse; font-size: 15px;
+  }
+  .summary-table th {
+    background: var(--blue-deep); color: var(--white);
+    padding: 12px 14px; text-align: left;
+  }
+  .summary-table td { padding: 11px 14px; border-bottom: 1px solid var(--blue-soft); }
+  .summary-table tr.critical { background: #FFF5F5; }
+  .summary-table tr.warning  { background: #FFFBEB; }
+  .summary-table tr.info     { background: #F0F9FF; }
+
+  footer {
+    text-align: center;
+    color: var(--blue-deep);
+    margin-top: 30px;
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  footer .signature { font-weight: 700; font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Tony's Python Code Review &mdash; Round 2</h1>
+  <div class="sub">Welcome back! Let's see how much you've leveled up your CS50P Guessing Game.</div>
+  <div class="meta">
+    <span class="pill">Reviewer: Tony &middot; Your Python Mentor</span>
+    <span class="pill">Date: 2026-May-28</span>
+    <span class="pill">Files: project.py, GuessingBoardOperator.py, GuessingBoardOperator_GUI.py, GuessingBoardOperator_leaderboard.py, test_project.py</span>
+    <span class="pill">Previous review: 2026-May-24</span>
+  </div>
+</header>
+
+<!-- ============================================= -->
+<!-- INTRO                                          -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Hey, you came back!</h2>
+  <p>
+    First of all &mdash; you actually <strong>read</strong> my last review and went to work. That puts you ahead of
+    about 90% of developers (seriously, even adults). The file is now <em>split into multiple modules</em>, the 10
+    near-identical functions got crushed down to 2, and you moved a ton of state into your class. That's huge.
+  </p>
+  <p>
+    There's still polish to do, and I found a few new things hiding in here, but the trajectory is great.
+    Let's celebrate the wins first.
+  </p>
+</section>
+
+<!-- ============================================= -->
+<!-- WHAT YOU FIXED                                 -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>What You Fixed Since Last Time</h2>
+  <p>I went line-by-line comparing the old code to the new. Here's what got better:</p>
+
+  <div class="win">
+    <div class="title">You killed the 10 copy-paste game functions <span class="badge fixed">Fixed</span></div>
+    <p>
+      Before: you had <code>main_game1</code>, <code>main_game2</code>, &hellip; <code>main_game10</code>.
+      Now: just <code>main_game1</code> (sets up the buttons) and <code>main_game2</code> (re-uses them for rounds
+      2&ndash;10), with a <code>return_back</code> bridge. You went from ~10 functions to 3.
+      That's at least 150 lines deleted. Beautiful.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You moved state into the class &mdash; goodbye globals! <span class="badge fixed">Mostly fixed</span></div>
+    <p>
+      <code>self.point</code>, <code>self.counting</code>, <code>self.point2</code>, <code>self.high_score</code>,
+      and even <code>self._name</code> all live inside <code>GuessingBoardOperator_GUI</code> now. No more
+      <code>global point</code> sprinkled everywhere. That's a massive design upgrade.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You split the project into modules <span class="badge fixed">Fixed</span></div>
+    <p>
+      Last time, everything lived in <code>project.py</code>. Now you have a <code>GuessingBoard/</code> package
+      with three focused files: the scoring class, the GUI, and the leaderboard. That's professional-level
+      organisation &mdash; this is how real Python projects are structured.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You fixed the duplicate test name <span class="badge fixed">Fixed</span></div>
+    <p>
+      Before: two functions both called <code>test_get_point1</code> (pytest only ran one).
+      Now: <code>test_get_point1</code> and <code>test_get_point2</code>. Both tests actually run now.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You rewrote the scary "doesn't work" comment <span class="badge fixed">Fixed</span></div>
+    <p>
+      The new docstring at the top is clean and professional: <em>"Guessing Game &mdash; a CS50P final project.
+      Run from a terminal&hellip;"</em>. Much better than the old warning. The grader will love this.
+    </p>
+  </div>
+
+  <div class="win">
+    <div class="title">You used a real <code>@property</code> for <code>name</code> in the GUI class</div>
+    <p>
+      I see <code>@property</code> + private <code>_name</code> in <code>GuessingBoardOperator_GUI</code>. That's
+      a clean way to expose state without letting random code overwrite it. Nice touch.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- OVERALL SCORE                                  -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Overall Score</h2>
+  <div class="score-wrap">
+    <div class="score-badge">
+      <div class="num">8.1</div>
+      <div class="lbl">out of 10</div>
+    </div>
+    <div class="score-msg">
+      <p>
+        <span class="score-trend">&uarr; +0.9 from 7.2</span>
+      </p>
+      <p>
+        <strong>Real, measurable improvement.</strong> The architecture got way better, the duplication is mostly
+        gone, and the project is now organised like a real Python package. You're solidly in "this would impress
+        the grader" territory.
+      </p>
+      <p>
+        What's holding the score back: a couple of real bugs I want to point at (one in the answer validator and
+        one in the scoring class), plus the tests don't actually match what the code does. Fix those and you're
+        knocking on 9/10.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- WHAT YOU DID GREAT (NEW STRENGTHS)             -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>What You Did Great (in this round)</h2>
+
+  <div class="strength">
+    <div class="title">Package layout with <code>__init__</code>-ready relative imports</div>
+    <p>
+      In <code>GuessingBoardOperator_GUI.py</code>: <code>from . import GuessingBoardOperator as GB</code>.
+      That dot-import means "from this same package". This is the right modern way to do it.
+    </p>
+  </div>
+
+  <div class="strength">
+    <div class="title">Real high-score logic with leaderboard write-back</div>
+    <p>
+      In <code>end_game</code>, you compare <code>self.point &gt; self.high_score</code> and update both the
+      attribute and the CSV. You're thinking about <em>state over time</em>, not just one game.
+    </p>
+  </div>
+
+  <div class="strength">
+    <div class="title">Polite empty-name + special-character + duplicate-name checks survived the refactor</div>
+    <p>
+      All three validations are still in <code>main_game1</code>. You didn't drop them when you refactored.
+      That kind of care is exactly what separates good devs from sloppy ones.
+    </p>
+  </div>
+
+  <div class="strength">
+    <div class="title">Clean leaderboard sorting with <code>sorted(&hellip;, key=lambda x: int(x["score"]))</code></div>
+    <p>
+      That one line gives you top-score-first ordering. You even remembered to cast the score to <code>int</code>
+      before sorting (otherwise <code>"10"</code> would sort before <code>"2"</code>). Sharp.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- ISSUE SUMMARY                                  -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Issue Summary</h2>
+  <p>Here's the full list of what I found this round, ranked by severity.</p>
+  <div style="overflow-x:auto;">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th style="text-align:center;">#</th>
+          <th>Issue</th>
+          <th style="text-align:center;">Severity</th>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="critical">
+          <td style="text-align:center;font-weight:700;">1</td>
+          <td>Answer validation loop breaks on first valid answer &mdash; never validates the rest</td>
+          <td style="text-align:center;"><span class="badge critical">Critical</span></td>
+          <td><code>project.py</code></td>
+        </tr>
+        <tr class="critical">
+          <td style="text-align:center;font-weight:700;">2</td>
+          <td><code>make_leaderboard</code> never writes a CSV header &mdash; corrupts file</td>
+          <td style="text-align:center;"><span class="badge critical">Critical</span></td>
+          <td><code>GuessingBoardOperator_leaderboard.py</code></td>
+        </tr>
+        <tr class="critical">
+          <td style="text-align:center;font-weight:700;">3</td>
+          <td><code>test_leaderboard</code> calls instance methods as class methods &mdash; will crash</td>
+          <td style="text-align:center;"><span class="badge critical">Critical</span></td>
+          <td><code>test_project.py</code></td>
+        </tr>
+        <tr class="warning">
+          <td style="text-align:center;font-weight:700;">4</td>
+          <td><code>get_question()</code> uses <code>sys.exit()</code>, but tests expect <code>ValueError</code> / <code>TypeError</code></td>
+          <td style="text-align:center;"><span class="badge warning">Warning</span></td>
+          <td><code>project.py</code> &amp; <code>test_project.py</code></td>
+        </tr>
+        <tr class="warning">
+          <td style="text-align:center;font-weight:700;">5</td>
+          <td>Circular import between GUI and leaderboard modules (works by luck)</td>
+          <td style="text-align:center;"><span class="badge warning">Warning</span></td>
+          <td><code>GuessingBoardOperator_leaderboard.py</code></td>
+        </tr>
+        <tr class="warning">
+          <td style="text-align:center;font-weight:700;">6</td>
+          <td><code>main()</code> calls <code>get_question()</code> twice in a row</td>
+          <td style="text-align:center;"><span class="badge warning">Warning</span></td>
+          <td><code>project.py</code></td>
+        </tr>
+        <tr class="warning">
+          <td style="text-align:center;font-weight:700;">7</td>
+          <td><code>main_game2</code> if/else does the same thing in both branches</td>
+          <td style="text-align:center;"><span class="badge warning">Warning</span></td>
+          <td><code>GuessingBoardOperator_GUI.py</code></td>
+        </tr>
+        <tr class="warning">
+          <td style="text-align:center;font-weight:700;">8</td>
+          <td><code>GuessingBoardOperator.get_point</code> increments <code>_count</code> even on already-pressed</td>
+          <td style="text-align:center;"><span class="badge warning">Warning</span></td>
+          <td><code>GuessingBoardOperator.py</code></td>
+        </tr>
+        <tr class="warning">
+          <td style="text-align:center;font-weight:700;">9</td>
+          <td><code>display_leaderboard</code> calls <code>read_leaderboard()</code> twice per row (N+1 reads)</td>
+          <td style="text-align:center;"><span class="badge warning">Warning</span></td>
+          <td><code>GuessingBoardOperator_leaderboard.py</code></td>
+        </tr>
+        <tr class="info">
+          <td style="text-align:center;font-weight:700;">10</td>
+          <td>Module-level globals <code>name</code> (project.py) and <code>namer</code> (GUI module) still exist</td>
+          <td style="text-align:center;"><span class="badge info">Suggestion</span></td>
+          <td>multiple files</td>
+        </tr>
+        <tr class="info">
+          <td style="text-align:center;font-weight:700;">11</td>
+          <td><code>from tkinter import *</code> still being used everywhere</td>
+          <td style="text-align:center;"><span class="badge info">Suggestion</span></td>
+          <td>multiple files</td>
+        </tr>
+        <tr class="info">
+          <td style="text-align:center;font-weight:700;">12</td>
+          <td>Module-level singleton <code>gg = GuessingBoardOperator_GUI()</code> at bottom of GUI file</td>
+          <td style="text-align:center;"><span class="badge info">Suggestion</span></td>
+          <td><code>GuessingBoardOperator_GUI.py</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- ISSUES IN DETAIL                               -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Issues Found &mdash; The Why and The How</h2>
+  <p>
+    Heads up: a few of these are <em>real bugs</em> &mdash; not style nitpicks. The good news is that every one of them
+    is fixable in just a few lines. Let's go.
+  </p>
+
+  <!-- Issue 1: CRITICAL Answer loop -->
+  <div class="issue critical">
+    <h3>Issue 1 &mdash; The answer validator only checks the first answer
+      <span class="badge critical">Critical</span>
+    </h3>
+    <div class="where">project.py &middot; lines 67&ndash;77</div>
+
+    <span class="code-label before">Before</span>
+<pre><code>for answer in ans:
+    if answer == 'A':
+        break
+    elif answer =='B':
+        break
+    elif answer =='C':
+        break
+    elif answer =='D':
+        break
+    else:
+        sys.exit('invalid answer')</code></pre>
+
+    <div class="why">
+      <strong>Why this is a bug:</strong> Look at what <code>break</code> does &mdash; it <em>exits the loop</em>.
+      So the moment the loop hits the FIRST answer and it's an A/B/C/D, the validation stops. If your CSV's first
+      answer is "A" and the second answer is "potato", the bad answer slips right through.
+      <br><br>
+      This is one of those bugs that hides because <em>your test CSV happens to be valid</em>. The bug only shows
+      up when somebody hands you bad data &mdash; which is exactly when you wanted the check.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Don't <code>break</code> &mdash; just check each one. The cleanest way is
+      <code>in {'A','B','C','D'}</code>.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>VALID_ANSWERS = {'A', 'B', 'C', 'D'}
+
+for answer in ans:
+    if answer not in VALID_ANSWERS:
+        sys.exit(f'invalid answer: {answer!r} (must be A, B, C, or D)')</code></pre>
+    <p style="margin-top:8px;">
+      One line replaces nine. And now it actually checks <em>every</em> answer in your CSV. That little
+      <code>!r</code> in the f-string also prints the bad value with quotes so you can see exactly what was wrong.
+    </p>
+  </div>
+
+  <!-- Issue 2: CRITICAL Header -->
+  <div class="issue critical">
+    <h3>Issue 2 &mdash; <code>make_leaderboard</code> never writes a header
+      <span class="badge critical">Critical</span>
+    </h3>
+    <div class="where">GuessingBoardOperator_leaderboard.py &middot; lines 8&ndash;13</div>
+
+    <span class="code-label before">Before</span>
+<pre><code>def make_leaderboard(self, high_score):
+    with open('leaderboard.csv',"a") as file_name:
+        fieldnames=['player','score']
+        writer=csv.DictWriter(file_name,fieldnames=fieldnames)
+        writer.writerow({'player': str(GG.namer.get()),'score': high_score})</code></pre>
+
+    <div class="why">
+      <strong>Why this is a bug:</strong> You open the file in append mode (<code>"a"</code>), set up
+      <code>fieldnames</code>, but you never call <code>writer.writeheader()</code>. If the file doesn't exist
+      yet (first time the app runs), the file ends up with just data rows and no header.
+      <br><br>
+      Then when <code>read_leaderboard()</code> uses <code>csv.DictReader</code> &mdash; which expects the first row
+      to be the header &mdash; it eats the first player's row as headers. Player #1 disappears from the
+      leaderboard forever.
+      <br><br>
+      The reason it <em>seems</em> to work right now is your <code>leaderboard.csv</code> already has a header
+      from earlier runs. Delete the file and watch it break.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Check if the file is new; if so, write the header first.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>import os
+
+def make_leaderboard(self, high_score):
+    file_exists = os.path.isfile('leaderboard.csv') \
+                  and os.path.getsize('leaderboard.csv') &gt; 0
+    with open('leaderboard.csv', 'a', newline='') as file_name:
+        fieldnames = ['player', 'score']
+        writer = csv.DictWriter(file_name, fieldnames=fieldnames)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow({'player': GG.namer.get(), 'score': high_score})</code></pre>
+    <p style="margin-top:8px;">
+      Bonus: <code>newline=''</code> stops CSV files from getting blank rows on Windows. Always include it
+      when working with the <code>csv</code> module.
+    </p>
+  </div>
+
+  <!-- Issue 3: CRITICAL Test misuse -->
+  <div class="issue critical">
+    <h3>Issue 3 &mdash; <code>test_leaderboard</code> calls instance methods like class methods
+      <span class="badge critical">Critical</span>
+    </h3>
+    <div class="where">test_project.py &middot; lines 30&ndash;36</div>
+
+    <span class="code-label before">Before</span>
+<pre><code>from project import GuessingBoardOperator_leaderboard, get_question
+
+def test_leaderboard():
+    assert len(GuessingBoardOperator_leaderboard.read_leaderboard_xSort()) &gt;= 0
+    assert len(GuessingBoardOperator_leaderboard.read_leaderboard()) &gt;= 0
+    ...</code></pre>
+
+    <div class="why">
+      <strong>Why this is broken (two problems):</strong>
+      <ol>
+        <li><strong>Wrong import:</strong> <code>project.py</code> never imports
+            <code>GuessingBoardOperator_leaderboard</code>, so this import will fail with an
+            <code>ImportError</code> the moment pytest tries to load the file.</li>
+        <li><strong>Missing parentheses / instance:</strong> Even if you fixed the import, you're calling
+            <code>GuessingBoardOperator_leaderboard.read_leaderboard()</code> as if it were a class method
+            &mdash; but it's an <em>instance</em> method (it takes <code>self</code>). You need to create an
+            object first: <code>lb = GuessingBoardOperator_leaderboard()</code>.</li>
+      </ol>
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Import the class from the right place, build an instance, then call methods on it.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>from GuessingBoard.GuessingBoardOperator_leaderboard import GuessingBoardOperator_leaderboard
+
+def test_leaderboard():
+    lb = GuessingBoardOperator_leaderboard()
+    assert isinstance(lb.read_leaderboard_xSort(), list)
+    assert isinstance(lb.read_leaderboard(), list)
+    # If the file may be empty, only check item types when items exist:
+    rows = lb.read_leaderboard_xSort()
+    if rows:
+        assert isinstance(rows[0], dict)</code></pre>
+    <p style="margin-top:8px;">
+      Note: <code>isinstance(x, list)</code> is preferred over <code>type(x) == list</code> &mdash; it's the
+      idiomatic Python way and it plays nicer with subclasses.
+    </p>
+  </div>
+
+  <!-- Issue 4: sys.exit vs raise -->
+  <div class="issue warning">
+    <h3>Issue 4 &mdash; <code>sys.exit()</code> in <code>get_question()</code> breaks your tests
+      <span class="badge warning">Warning</span>
+    </h3>
+    <div class="where">project.py &middot; lines 52&ndash;77 &amp; test_project.py lines 13&ndash;16</div>
+
+    <span class="code-label before">Before</span>
+<pre><code># project.py
+if len(questions) &lt; 10:
+    sys.exit('not enough question')
+if len(questions) &gt; 10:
+    sys.exit('too many question')
+
+# test_project.py
+with pytest.raises(ValueError):
+    get_question('wrong.csv')
+with pytest.raises(TypeError):
+    get_question("not_enough.csv")</code></pre>
+
+    <div class="why">
+      <strong>Why this is a problem:</strong> <code>sys.exit()</code> raises <code>SystemExit</code> &mdash; it
+      doesn't raise <code>ValueError</code> or <code>TypeError</code>. So your tests that say
+      <code>pytest.raises(ValueError)</code> will <em>fail</em>, because the function raised the wrong type
+      of exception.
+      <br><br>
+      Also, last time we talked about how <code>ValueError</code> is the right choice for "wrong value" (like
+      "not exactly 10 questions"). <code>TypeError</code> is for "wrong type" (like passing a number when a list
+      was expected). The fix: use exceptions, not <code>sys.exit</code>, in library-like code.
+      <br><br>
+      Rule of thumb: <code>sys.exit</code> in <code>main()</code> is fine. But <code>sys.exit</code> deep inside
+      a helper function makes the helper untestable.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Raise specific exceptions in <code>get_question</code>, and catch them
+      in <code>main()</code>.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code># project.py
+def get_question(f):
+    with open(f, 'r') as file:
+        ...
+        if len(questions) &lt; 10:
+            raise ValueError('not enough questions (need 10)')
+        if len(questions) &gt; 10:
+            raise ValueError('too many questions (need exactly 10)')
+        ...
+
+def main():
+    question_file = input(" Question file path: ")
+    try:
+        contents = get_question(question_file)
+    except FileNotFoundError:
+        sys.exit(f"File not found: {question_file}")
+    except ValueError as e:
+        sys.exit(f"Bad question file: {e}")
+    gg = GuessingBoardOperator_GUI()
+    gg.main_menu(*contents)</code></pre>
+    <p style="margin-top:8px;">
+      Also: update both tests to expect <code>ValueError</code> (since the function never raises
+      <code>TypeError</code> anymore). Tests should match what your function actually does &mdash; never the
+      other way around.
+    </p>
+  </div>
+
+  <!-- Issue 5: Circular import -->
+  <div class="issue warning">
+    <h3>Issue 5 &mdash; Circular import between GUI and leaderboard
+      <span class="badge warning">Warning</span>
+    </h3>
+    <div class="where">GuessingBoardOperator_leaderboard.py line 1 &harr; GuessingBoardOperator_GUI.py line 1</div>
+
+    <span class="code-label before">Before</span>
+<pre><code># GuessingBoardOperator_leaderboard.py
+from . import GuessingBoardOperator_GUI as GG    # imports GUI
+
+# GuessingBoardOperator_GUI.py
+from . import GuessingBoardOperator_leaderboard as GL  # imports leaderboard back</code></pre>
+
+    <div class="why">
+      <strong>Why this is risky:</strong> Module A imports Module B, and Module B imports Module A.
+      Right now it works <em>because</em> the leaderboard only uses GG at call-time (<code>GG.namer.get()</code>),
+      not at import-time. But the moment you add a class-level reference like
+      <code>name = GG.namer</code> at the top, you'll get a confusing
+      <code>ImportError: cannot import name 'namer' from partially initialized module&hellip;</code>.
+      <br><br>
+      Circular imports are like two people each waiting for the other to finish their sentence first.
+      It works only when neither one tries to talk too soon.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Pass the player's name into <code>make_leaderboard</code> instead of reaching
+      into another module. That's <em>dependency injection</em> &mdash; a fancy phrase for "pass what you need
+      as an argument."
+    </div>
+    <span class="code-label after">After</span>
+<pre><code># GuessingBoardOperator_leaderboard.py  (no GUI import at all!)
+class GuessingBoardOperator_leaderboard:
+    def make_leaderboard(self, player_name, high_score):
+        ...
+        writer.writerow({'player': player_name, 'score': high_score})
+
+# GuessingBoardOperator_GUI.py  (calling side)
+self.gl.make_leaderboard(self._name, self.high_score)</code></pre>
+  </div>
+
+  <!-- Issue 6: Double call -->
+  <div class="issue warning">
+    <h3>Issue 6 &mdash; <code>main()</code> calls <code>get_question()</code> twice
+      <span class="badge warning">Warning</span>
+    </h3>
+    <div class="where">project.py &middot; lines 20&ndash;22</div>
+
+    <span class="code-label before">Before</span>
+<pre><code>def main():
+    question_file=input(" Question file path: ")
+    get_question(question_file)          # &lt;-- result thrown away
+    contents=get_question(question_file) # &lt;-- called AGAIN
+    gg=GuessingBoardOperator_GUI()
+    gg.main_menu(contents[0],contents[1],contents[2],contents[3],contents[4],contents[5])</code></pre>
+
+    <div class="why">
+      <strong>Why this is wasteful:</strong> You read and parse the entire CSV file <em>twice</em> on startup,
+      and you throw away the first result. With a tiny CSV nobody notices, but it's the kind of habit you want
+      to break before it shows up in a place that matters (like a 100MB file).
+      <br><br>
+      Also notice <code>gg.main_menu(contents[0], contents[1], &hellip;)</code> &mdash; that's exactly what the
+      <code>*</code> unpacking operator was made for.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong>
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>def main():
+    question_file = input(" Question file path: ")
+    contents = get_question(question_file)
+    gg = GuessingBoardOperator_GUI()
+    gg.main_menu(*contents)   # unpacks the list as 6 arguments</code></pre>
+  </div>
+
+  <!-- Issue 7: dead branch -->
+  <div class="issue warning">
+    <h3>Issue 7 &mdash; <code>main_game2</code> if/else does the same thing on both sides
+      <span class="badge warning">Warning</span>
+    </h3>
+    <div class="where">GuessingBoardOperator_GUI.py &middot; lines 92&ndash;95</div>
+
+    <span class="code-label before">Before</span>
+<pre><code>def main_game2(self, buttons, quits, question_title, question, A, B, C, D, ans, display):
+    if self.point2 &lt; self.point:
+        self.counting = self.counting + 1
+    else:
+        self.counting = self.counting + 1
+    self.point2 = self.point</code></pre>
+
+    <div class="why">
+      <strong>Why this is a code smell:</strong> Both branches do <em>exactly the same thing</em>. The
+      <code>if</code> is dead &mdash; it never affects behaviour. Either the logic is supposed to be different
+      (and you forgot to finish it) or you don't need the <code>if</code> at all. Either way it's confusing
+      to anyone reading the code &mdash; including future-you.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Just advance the counter, no if needed.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>def main_game2(self, buttons, quits, question_title, question, A, B, C, D, ans, display):
+    self.counting += 1
+    self.point2 = self.point   # remember the previous score (if you actually need to)</code></pre>
+    <p style="margin-top:8px;">
+      And honestly &mdash; do you even use <code>self.point2</code> anywhere else now? Search for it. If it's never
+      read, it's dead state and you can delete it.
+    </p>
+  </div>
+
+  <!-- Issue 8: get_point increments even when pressed -->
+  <div class="issue warning">
+    <h3>Issue 8 &mdash; <code>get_point</code> increments <code>_count</code> even after a press is ignored
+      <span class="badge warning">Warning</span>
+    </h3>
+    <div class="where">GuessingBoardOperator.py &middot; lines 9&ndash;21</div>
+
+    <span class="code-label before">Before</span>
+<pre><code>def get_point(self, u_ans, ans, count, bottons):
+    if not self.already_pressed:
+        if u_ans == ans[count]:
+            self.point = self.point + 1
+        elif u_ans != ans[count]:
+            self.point = self.point     # this line does nothing
+        for button in bottons:
+            button.config(bg='grey', fg='black')
+    if self.already_pressed:
+        self.point = self.point         # also does nothing
+    self.already_pressed = True
+    self._count = self._count + 1       # &lt;-- increments EVERY call
+    return int(self.point)</code></pre>
+
+    <div class="why">
+      <strong>Why this is messy:</strong> A few problems stacked together:
+      <ol>
+        <li><code>self.point = self.point</code> appears twice &mdash; both lines do absolutely nothing.
+            Delete them.</li>
+        <li><code>self._count = self._count + 1</code> runs <em>every</em> call &mdash; including when
+            <code>already_pressed</code> is True. So if a button click somehow fires twice, the question
+            index jumps ahead by two. That's the kind of bug that's hard to spot.</li>
+        <li>The <code>elif u_ans != ans[count]</code> is overcomplicated &mdash; it's just "the else branch".
+            <code>else:</code> would be enough.</li>
+      </ol>
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Simplify and only increment when we actually processed an answer.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>def get_point(self, u_ans, ans, count, buttons):
+    if self.already_pressed:
+        return int(self.point)         # early return — much cleaner
+
+    if u_ans == ans[count]:
+        self.point += 1
+    for button in buttons:
+        button.config(bg='grey', fg='black')
+
+    self.already_pressed = True
+    self._count += 1
+    return int(self.point)</code></pre>
+    <p style="margin-top:8px;">
+      "Early return" is a powerful trick: handle the special case first, return, and the rest of the function
+      doesn't need to be wrapped in an if. The code reads top-to-bottom like a story.
+    </p>
+  </div>
+
+  <!-- Issue 9: display_leaderboard -->
+  <div class="issue warning">
+    <h3>Issue 9 &mdash; <code>display_leaderboard</code> re-reads the CSV file inside the loop
+      <span class="badge warning">Warning</span>
+    </h3>
+    <div class="where">GuessingBoardOperator_leaderboard.py &middot; lines 32&ndash;52</div>
+
+    <span class="code-label before">Before</span>
+<pre><code>def display_leaderboard(self):
+    max_len = len(self.read_leaderboard())     # opens file once
+    ...
+    for i in range(max_len):
+        label = Label(window, text=f"{i+1}.{self.read_leaderboard()[i]['player']}", ...)  # opens AGAIN
+        score = Label(window, text=self.read_leaderboard()[i]["score"], ...)              # AGAIN
+        ...</code></pre>
+
+    <div class="why">
+      <strong>Why this is slow:</strong> Each call to <code>self.read_leaderboard()</code> opens
+      <code>leaderboard.csv</code>, reads the whole file, parses it, and sorts it. You're doing that
+      <strong>three times per row</strong> &mdash; so 10 rows = 30 file opens. With a small leaderboard
+      it's invisible, but it's the same pattern as a real-world performance bug called "N+1 queries"
+      that costs companies millions of dollars per year.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Call it once, save the result, use the saved variable.
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>def display_leaderboard(self):
+    rows = self.read_leaderboard()                 # read ONCE
+    top_n = rows[:10]                              # slice off top 10
+    window = Tk()
+    ...
+    for i, row in enumerate(top_n):
+        Label(window, text=f"{i+1}. {row['player']}", ...).place(...)
+        Label(window, text=row['score'], ...).place(...)</code></pre>
+    <p style="margin-top:8px;">
+      Bonus: <code>enumerate(top_n)</code> gives you both the index <em>and</em> the item at the same time.
+      Way nicer than <code>range(len(&hellip;))</code> followed by <code>top_n[i]</code>.
+    </p>
+  </div>
+
+  <!-- Issue 10: globals -->
+  <div class="issue info">
+    <h3>Issue 10 &mdash; A couple of globals are still hanging around
+      <span class="badge info">Suggestion</span>
+    </h3>
+    <div class="where">project.py line 12 &amp; GuessingBoardOperator_GUI.py line 6</div>
+
+    <span class="code-label before">Before</span>
+<pre><code># project.py
+name = None                # &lt;-- never used anywhere
+
+# GuessingBoardOperator_GUI.py
+namer = None
+...
+global namer
+namer = Entry(...)
+...
+GG.namer.get()             # leaderboard reaches across modules to read it</code></pre>
+
+    <div class="why">
+      <strong>Why this is a leftover:</strong> The <code>name = None</code> in <code>project.py</code> isn't
+      used by anything anymore &mdash; it's dead code. Delete it.
+      <br><br>
+      The <code>namer</code> in the GUI module is more interesting. It's a tkinter <code>Entry</code> widget
+      that the leaderboard module reads via <code>GG.namer.get()</code>. That works, but it's the global problem
+      coming back with a new name &mdash; one module is sneakily reaching into another module's state.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong> Delete the unused <code>name = None</code>. Store <code>namer</code> as
+      <code>self.namer</code> on the GUI instance, and pass the player name into the leaderboard methods
+      as a regular argument (see Issue 5).
+    </div>
+  </div>
+
+  <!-- Issue 11: from tkinter import * -->
+  <div class="issue info">
+    <h3>Issue 11 &mdash; <code>from tkinter import *</code> is still everywhere
+      <span class="badge info">Suggestion</span>
+    </h3>
+    <div class="where">project.py, GuessingBoardOperator_GUI.py, GuessingBoardOperator_leaderboard.py, test_project.py</div>
+
+    <div class="why">
+      <strong>Why this matters:</strong> Last time I asked you to switch to <code>import tkinter as tk</code>.
+      I get it &mdash; it's tedious to type <code>tk.Button</code> everywhere when <code>Button</code> works.
+      But star imports dump every name in tkinter into your file, and one of them is <code>Entry</code>,
+      another is <code>Label</code>, and you also use <code>name</code>, <code>file</code>, <code>row</code>
+      as variables &mdash; if any of those ever collide with a tkinter name, you'll spend hours debugging.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong>
+    </div>
+    <span class="code-label after">After</span>
+<pre><code>import tkinter as tk
+
+window = tk.Tk()
+btn    = tk.Button(window, text="Hi", command=...)
+lbl    = tk.Label(window, text="Hello")</code></pre>
+    <p style="margin-top:8px;">
+      This is a "do it once and move on" change. After about ten minutes of pain, you'll never miss
+      <code>from tkinter import *</code> again.
+    </p>
+  </div>
+
+  <!-- Issue 12: module-level singleton -->
+  <div class="issue info">
+    <h3>Issue 12 &mdash; Module-level <code>gg = GuessingBoardOperator_GUI()</code> at the bottom
+      <span class="badge info">Suggestion</span>
+    </h3>
+    <div class="where">GuessingBoardOperator_GUI.py &middot; line 155</div>
+
+    <span class="code-label before">Before</span>
+<pre><code># last line of GuessingBoardOperator_GUI.py
+gg = GuessingBoardOperator_GUI()
+
+# Inside the class, methods do this:
+command = lambda: gg.main_game1(...)   # references the module-level gg</code></pre>
+
+    <div class="why">
+      <strong>Why this is fragile:</strong> Inside a method, you write <code>gg.main_game1(&hellip;)</code>
+      instead of <code>self.main_game1(&hellip;)</code>. That works because the module made <code>gg</code> as
+      a global at import time. But it means there can only ever be <em>one</em> game running, and if you import
+      this module twice in tests it gets weird.
+      <br><br>
+      The cleaner pattern: use <code>self</code> inside the class, and let <code>main()</code> create the
+      single instance it needs.
+    </div>
+
+    <div class="fix">
+      <strong>Tony's Fix:</strong>
+    </div>
+    <span class="code-label after">After</span>
+<pre><code># Inside the class, use self everywhere:
+command=lambda: self.main_game1(...)
+
+# Delete the module-level gg = ... line.
+# main() in project.py already does:  gg = GuessingBoardOperator_GUI()</code></pre>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- LEARNING MOMENTS                               -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Learning Moments</h2>
+  <p>Three Python concepts to chase down before the next round:</p>
+
+  <ol class="lessons">
+    <li>
+      <strong>Truth tables and short-circuit evaluation.</strong>
+      The <code>break</code> bug in Issue 1 is really a "I wrote logic that <em>looks</em> right but doesn't behave
+      right" bug. Practice writing tiny code on paper: "if input is X, what does each line do?" &mdash; you'll
+      catch this kind of bug before it hits the file. Look up Python's <code>any()</code> and <code>all()</code>
+      functions &mdash; they're built for "is every item valid?" style checks.
+    </li>
+    <li>
+      <strong>Exceptions vs <code>sys.exit</code>.</strong>
+      Rule: helpers <em>raise</em>, top-level scripts <em>exit</em>. When you raise an exception, the caller
+      gets to decide what to do (show an error popup? Try a different file?). When you call
+      <code>sys.exit</code>, the program is dead and your tests can't catch it cleanly. Read about Python's
+      <code>try / except / raise</code> in the official docs &mdash; once it clicks, your code gets way more flexible.
+    </li>
+    <li>
+      <strong>Single responsibility &amp; dependency injection.</strong>
+      Issue 5 (circular import) and Issue 12 (module-level singleton) are both forms of <em>tight coupling</em>
+      &mdash; modules grabbing each other's stuff instead of passing things around. The cure is the same: instead
+      of "Module B reaches into Module A," pass what you need as a function argument. Sounds boring but it's
+      the secret to writing code that's easy to change later.
+    </li>
+  </ol>
+</section>
+
+<!-- ============================================= -->
+<!-- NEXT CHALLENGE                                 -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>Your Next Challenge</h2>
+  <div class="next-box">
+    <h3>Make every test in <code>test_project.py</code> pass &mdash; for real this time</h3>
+    <p>
+      Right now I'm pretty sure if you run <code>pytest test_project.py</code> on this codebase, multiple tests
+      crash. That's a fixable, focused, satisfying mission. Here's your checklist:
+    </p>
+    <ol>
+      <li>Replace <code>sys.exit</code> with <code>raise ValueError</code> in <code>get_question</code>
+          (Issue 4).</li>
+      <li>Update the second <code>pytest.raises(TypeError)</code> in <code>test_get_question</code> to
+          <code>pytest.raises(ValueError)</code>.</li>
+      <li>Fix the leaderboard test by importing the class from the right place and creating an instance
+          (Issue 3).</li>
+      <li>Run <code>pytest -v</code> and watch them all pass green.</li>
+    </ol>
+    <p style="margin-bottom:0;">
+      When you're done, run the game (delete <code>leaderboard.csv</code> first to test the header bug), play
+      one round, and look at the resulting CSV. If the first row says <code>player,score</code> &mdash; congratulations,
+      you fixed Issue 2 too. <strong>You've got this.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ============================================= -->
+<!-- FINAL ENCOURAGEMENT                            -->
+<!-- ============================================= -->
+<section class="card">
+  <h2>One Last Thing</h2>
+  <p>
+    You came back, read the feedback, did the hard refactoring work, and you didn't break the things that
+    were already good. That's the actual job of a software engineer &mdash; iterate, improve, and keep shipping.
+    Most adults don't operate like that. You're doing it at 13.
+  </p>
+  <p>
+    The bugs I called out are bugs <em>because</em> your project is now ambitious enough to have real edge cases.
+    Tiny projects don't have circular imports. Beginner code doesn't have header-row corner cases. You're
+    hitting these problems because you've grown out of the beginner stuff.
+  </p>
+  <p>
+    <strong>Submit this for CS50P with pride.</strong> Then come back and we'll knock out the next round together.
+  </p>
+</section>
+
+<footer>
+  <div class="signature">Reviewed by Tony &middot; Your Python Mentor</div>
+  <div>2026-May-28 &middot; Review v2 (since v1 on 2026-May-24)</div>
+</footer>
+
+</div>
+</body>
+</html>

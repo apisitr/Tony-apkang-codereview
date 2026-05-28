@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tony's Defect Report — Issue #1 · 28 May 2026</title>
+<style>
+  :root {
+    --blue-deep: #1E3A8A;
+    --blue-mid:  #3B82F6;
+    --blue-soft: #DBEAFE;
+    --white:     #FFFFFF;
+    --ink:       #0F172A;
+    --code-bg:   #1E293B;
+    --code-fg:   #E2E8F0;
+    --good:      #16A34A;
+    --warn:      #D97706;
+    --bad:       #DC2626;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #F8FAFC;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  /* Header */
+  header.hero {
+    background: linear-gradient(135deg, #7C2D12, #DC2626);
+    color: var(--white);
+    padding: 36px 32px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2);
+    margin-bottom: 28px;
+  }
+  header.hero h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: -0.5px; }
+  header.hero .sub { opacity: 0.9; font-size: 16px; }
+  header.hero .meta {
+    margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px;
+    font-size: 13px;
+  }
+  header.hero .pill {
+    background: rgba(255,255,255,0.15);
+    padding: 5px 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+
+  /* Section card */
+  section.card {
+    background: var(--white);
+    border: 1px solid var(--blue-soft);
+    border-radius: 14px;
+    padding: 26px 28px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(30, 58, 138, 0.05);
+  }
+  section.card h2 {
+    margin: 0 0 14px;
+    color: var(--blue-deep);
+    font-size: 22px;
+    border-bottom: 3px solid var(--blue-soft);
+    padding-bottom: 9px;
+  }
+  section.card h3 {
+    color: var(--blue-deep);
+    margin-top: 18px;
+    margin-bottom: 6px;
+    font-size: 17px;
+  }
+  section.card p, section.card li { font-size: 15.5px; }
+
+  /* Error block */
+  .error-block {
+    background: #1E293B;
+    color: #FCA5A5;
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    margin: 14px 0 20px;
+    border-left: 5px solid var(--bad);
+    overflow-x: auto;
+  }
+  .error-block .line-ref { color: #94A3B8; }
+  .error-block .highlight { color: #FDE68A; font-weight: 700; }
+
+  /* Callout boxes */
+  .callout {
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 15px;
+  }
+  .callout.why  { background: #FEF3C7; border-left: 4px solid #D97706; }
+  .callout.clue { background: #EFF6FF; border-left: 4px solid var(--blue-mid); }
+  .callout.hint { background: #F0FDF4; border-left: 4px solid #16A34A; }
+  .callout strong { color: var(--blue-deep); }
+  .callout.why strong { color: #92400E; }
+  .callout.hint strong { color: #14532D; }
+
+  /* Code blocks */
+  .code-label {
+    display: inline-block;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 4px 10px; border-radius: 6px 6px 0 0;
+    color: var(--white);
+  }
+  .code-label.current { background: #64748B; }
+  .code-label.module  { background: #7C3AED; }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 14px 16px;
+    border-radius: 0 8px 8px 8px;
+    overflow-x: auto;
+    margin: 0 0 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  pre code { font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace; }
+  p code, li code {
+    background: var(--blue-soft); color: var(--blue-deep);
+    padding: 1px 6px; border-radius: 4px; font-size: 0.91em;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+  }
+
+  /* Concept diagram */
+  .diagram {
+    background: #F1F5F9;
+    border: 1px dashed #94A3B8;
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.9;
+    margin: 14px 0;
+    color: #1E293B;
+  }
+  .diagram .label { color: #7C3AED; font-weight: 700; }
+  .diagram .arrow { color: #64748B; }
+  .diagram .value { color: #15803D; font-weight: 700; }
+  .diagram .bad   { color: #DC2626; font-weight: 700; }
+
+  /* Severity badge */
+  .badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 999px; font-size: 12px;
+    font-weight: 600; letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .badge.critical { background: #FEE2E2; color: var(--bad); }
+
+  /* Step list */
+  ol.steps li {
+    margin: 10px 0;
+    padding-left: 6px;
+    font-size: 15.5px;
+  }
+
+  /* Challenge box */
+  .challenge {
+    background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+    border: 2px dashed var(--blue-mid);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-top: 8px;
+  }
+  .challenge h3 { margin-top: 0; color: var(--blue-deep); }
+
+  footer {
+    text-align: center;
+    color: var(--blue-deep);
+    margin-top: 28px;
+    font-size: 13px;
+    opacity: 0.75;
+  }
+  footer .signature { font-weight: 700; font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============================== -->
+<!-- HEADER                         -->
+<!-- ============================== -->
+<header class="hero">
+  <h1>Tony's Defect Report</h1>
+  <div class="sub">You found a real bug — now let's understand it deeply. That's how you learn.</div>
+  <div class="meta">
+    <span class="pill">Reviewer: Tony — Your Python Mentor</span>
+    <span class="pill">Date: 28 May 2026</span>
+    <span class="pill">Issue #: v1</span>
+    <span class="pill">File: project.py · line 23–24</span>
+    <span class="pill">Type: AttributeError</span>
+  </div>
+</header>
+
+<!-- ============================== -->
+<!-- THE ERROR                      -->
+<!-- ============================== -->
+<section class="card">
+  <h2>The Error You Saw</h2>
+  <div class="error-block">
+    <span class="line-ref">Traceback (most recent call last):</span><br>
+    &nbsp;&nbsp;<span class="line-ref">File "project.py", line 24, in <strong>main</strong></span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="highlight">gg.main_menu(contents[0], contents[1], contents[2], contents[3], contents[4], contents[5])</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="line-ref">^^^^^^^^^^^^</span><br>
+    <span class="highlight">AttributeError: module 'GuessingBoard.GuessingBoardOperator_GUI' has no attribute 'main_menu'</span>
+  </div>
+
+  <p>
+    Python is telling you: <em>"I looked inside the thing called <code>gg</code>, and I couldn't find anything named <code>main_menu</code>."</em>
+    But <code>main_menu</code> definitely exists in your code — so why can't Python find it?
+    The answer is in what <code>gg</code> actually IS.
+  </p>
+</section>
+
+<!-- ============================== -->
+<!-- ROOT CAUSE                     -->
+<!-- ============================== -->
+<section class="card">
+  <h2>Root Cause — Module vs Class vs Instance <span class="badge critical">Critical</span></h2>
+
+  <p>Look at these two lines in <code>project.py</code>:</p>
+
+  <span class="code-label current">project.py — current code</span>
+<pre><code>from GuessingBoard import GuessingBoardOperator_GUI   # line 10
+
+# ... inside main():
+gg = GuessingBoardOperator_GUI                        # line 23  ← THE PROBLEM
+gg.main_menu(contents[0], ...)                        # line 24  ← CRASHES HERE</code></pre>
+
+  <p>
+    When Python sees <code>from GuessingBoard import GuessingBoardOperator_GUI</code>,
+    it imports the <strong>file</strong> named <code>GuessingBoardOperator_GUI.py</code> — the whole file.
+    In Python, a file is called a <strong>module</strong>.
+  </p>
+
+  <p>
+    So on line 23, <code>gg = GuessingBoardOperator_GUI</code> makes <code>gg</code>
+    point to the <strong>module object</strong> — not the class inside it, and not any instance.
+  </p>
+
+  <div class="diagram">
+    <span class="label">GuessingBoardOperator_GUI</span> <span class="arrow">=</span> <span class="value">&lt;module 'GuessingBoard.GuessingBoardOperator_GUI'&gt;</span><br>
+    &nbsp;&nbsp;↳ contains: class <span class="value">GuessingBoardOperator_GUI</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↳ methods: <span class="value">main_menu()</span>, <span class="value">main_game1()</span>, <span class="value">end_game()</span> …<br>
+    &nbsp;&nbsp;↳ contains: variable <span class="value">gg</span> = instance of the class<br>
+    <br>
+    <span class="bad">gg (in project.py)</span> <span class="arrow">= the MODULE itself → no main_menu here!</span>
+  </div>
+
+  <div class="callout why">
+    <strong>The key confusion:</strong> The file and the class have the SAME name —
+    both are called <code>GuessingBoardOperator_GUI</code>. That makes it easy to mix them up.
+    But they are completely different things. The file is a container; the class is a blueprint;
+    an instance is the actual object that has <code>main_menu</code>.
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- CONCEPT: MODULE / CLASS / INST -->
+<!-- ============================== -->
+<section class="card">
+  <h2>The Concept: Module → Class → Instance</h2>
+
+  <p>
+    Think of it like a recipe book, a recipe, and a dish:
+  </p>
+
+  <table style="width:100%;border-collapse:collapse;font-size:15px;margin-bottom:14px;">
+    <thead>
+      <tr style="background:var(--blue-deep);color:white;">
+        <th style="padding:10px 14px;text-align:left;">Python Term</th>
+        <th style="padding:10px 14px;text-align:left;">Real World Analogy</th>
+        <th style="padding:10px 14px;text-align:left;">In Your Code</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="background:#F8FAFC;">
+        <td style="padding:10px 14px;font-weight:600;">Module (file)</td>
+        <td style="padding:10px 14px;">The recipe book</td>
+        <td style="padding:10px 14px;"><code>GuessingBoardOperator_GUI.py</code></td>
+      </tr>
+      <tr>
+        <td style="padding:10px 14px;font-weight:600;">Class</td>
+        <td style="padding:10px 14px;">One recipe inside the book</td>
+        <td style="padding:10px 14px;"><code>class GuessingBoardOperator_GUI:</code></td>
+      </tr>
+      <tr style="background:#F8FAFC;">
+        <td style="padding:10px 14px;font-weight:600;">Instance</td>
+        <td style="padding:10px 14px;">The actual dish you cooked</td>
+        <td style="padding:10px 14px;"><code>gg = GuessingBoardOperator_GUI()</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    <code>main_menu()</code> is a method on the <strong>instance</strong> (the cooked dish).
+    You cannot call it on the recipe book — only on the dish that was made from the recipe.
+  </p>
+
+  <span class="code-label module">GuessingBoardOperator_GUI.py — last line</span>
+<pre><code># At the very bottom of this file, there is already an instance created:
+gg = GuessingBoardOperator_GUI()    # &lt;-- instance created here!</code></pre>
+
+  <div class="callout clue">
+    <strong>Clue:</strong> The module already creates an instance called <code>gg</code> at the bottom.
+    That instance has <code>main_menu()</code>. So the object you need already exists —
+    you just need to reach it from <code>project.py</code> in the correct way.
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- YOUR CHALLENGE                 -->
+<!-- ============================== -->
+<section class="card">
+  <h2>Your Challenge — Fix It Yourself</h2>
+
+  <p>Here is the broken code in <code>project.py</code> lines 23–24:</p>
+
+<pre><code>gg = GuessingBoardOperator_GUI         # currently pointing at the module
+gg.main_menu(contents[0], contents[1], contents[2], contents[3], contents[4], contents[5])</code></pre>
+
+  <p>You need to make <code>gg</code> point to the <strong>instance</strong> that already exists inside the module, not the module itself.</p>
+
+  <div class="challenge">
+    <h3>Three questions to guide you</h3>
+    <ol class="steps">
+      <li>
+        Open <code>GuessingBoard/GuessingBoardOperator_GUI.py</code> and scroll to the very last line.
+        What is the name of the instance variable there?
+      </li>
+      <li>
+        In Python, if you have a module <code>mymod</code> and it has a variable <code>x</code> inside it,
+        how do you access <code>x</code> from outside? (Hint: it looks like <code>mymod.x</code>.)
+        Apply that same pattern here.
+      </li>
+      <li>
+        Also notice line 21 in <code>project.py</code>:
+        <pre style="margin:8px 0;"><code>get_question(question_file)       # result thrown away!
+contents = get_question(question_file)  # file read TWICE</code></pre>
+        Can you remove the unnecessary first call so the CSV is only read once?
+      </li>
+    </ol>
+  </div>
+
+  <div class="callout hint">
+    <strong>Hint (don't look until you've tried!):</strong>
+    The module is called <code>GuessingBoardOperator_GUI</code> and the instance inside it is also called <code>gg</code>.
+    How would you write "the thing named <code>gg</code> that lives inside <code>GuessingBoardOperator_GUI</code>"?
+    You're one dot away from the answer.
+  </div>
+</section>
+
+<!-- ============================== -->
+<!-- LESSON                         -->
+<!-- ============================== -->
+<section class="card">
+  <h2>The Lesson — Python Name Lookup Rules</h2>
+
+  <p>When Python sees <code>from GuessingBoard import GuessingBoardOperator_GUI</code>:</p>
+  <ol class="steps">
+    <li>It finds the folder <code>GuessingBoard/</code></li>
+    <li>It finds the file <code>GuessingBoardOperator_GUI.py</code> inside it</li>
+    <li>It loads that file and gives you access to it by the name <code>GuessingBoardOperator_GUI</code></li>
+    <li>That name refers to the <strong>module</strong> — the whole file, as an object</li>
+  </ol>
+
+  <p>
+    To get something <em>inside</em> the module, you use dot notation: <code>module.thing</code>.
+    This is exactly the same as how you access a class method: <code>instance.method()</code>.
+  </p>
+
+  <div class="callout clue">
+    <strong>Why does this matter for the future?</strong>
+    This confusion (module vs class vs instance) is one of the most common Python mistakes —
+    even experienced developers hit it when code gets refactored into multiple files.
+    Once you understand it deeply, you'll spot it instantly in any codebase.
+  </div>
+</section>
+
+<footer>
+  <div class="signature">Reported by Tony · Your Python Mentor</div>
+  <div>28 May 2026 · CS50P Guessing Game · Defect v1</div>
+</footer>
+
+</div>
+</body>
+</html>
